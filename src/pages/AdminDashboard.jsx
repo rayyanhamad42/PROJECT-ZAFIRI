@@ -1,109 +1,115 @@
-import React from 'react';
-import './AdminDashboard.css';
+import React, { useState, useEffect } from "react";
+import "./AdminDashboard.css";
+import {
+  FaUsers,
+  FaUserCog,
+  FaCheckCircle,
+  FaCogs,
+  FaTachometerAlt,
+} from "react-icons/fa";
 
 const AdminDashboard = () => {
-  // Mock data for pending tasks and statistics
-  const pendingTasks = [
-    { id: 1, sampleId: 'SMPL001', customer: 'John Doe', sampleType: 'Mwani', dateReceived: '2025-08-10' },
-    { id: 2, sampleId: 'SMPL002', customer: 'Jane Smith', sampleType: 'Coral', dateReceived: '2025-08-11' },
-  ];
+  const [adminName] = useState(localStorage.getItem("username") || "Administrator");
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalSamples: 0,
+    totalTests: 0,
+    totalDepartments: 0,
+  });
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [token] = useState(localStorage.getItem("access_token"));
 
-  const resultsToApprove = [
-    { id: 1, sampleId: 'SMPL003', technician: 'Alice Brown', status: 'Pending Approval', dateSubmitted: '2025-08-09' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch stats (API integration later)
+        const statsResponse = await fetch("http://192.168.1.100:8000/api/admin-dashboard/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const statsData = await statsResponse.json();
+        if (statsData.success) {
+          setStats(statsData.stats);
+        }
 
-  const statistics = {
-    totalSamples: 45,
-    pendingTasks: 2,
-    resultsApproved: 30,
-    resultsPending: 1,
-  };
+        // Fetch recent activities
+        const activitiesResponse = await fetch("http://192.168.1.100:8000/api/recent-activities/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const activitiesData = await activitiesResponse.json();
+        if (activitiesData.success) {
+          setRecentActivities(activitiesData.recent_activities);
+        }
+      } catch (error) {
+        console.error("Error fetching admin dashboard data:", error);
+      }
+    };
+
+    if (token) fetchData();
+  }, [token]);
 
   return (
     <div className="admin-dashboard">
-      <header className="dashboard-header">
-        <h1>Head of Department Dashboard</h1>
-        <div className="user-profile">
-          <span>Welcome, Dr. Ocean</span>
-          <button className="logout-btn">Logout</button>
-        </div>
-      </header>
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="logo">Zafiri logo </div>
+        <ul className="menu">
+          <li className="active"><FaTachometerAlt /> Dashboard</li>
+          <li><FaUsers /> View All Data</li>
+          <li><FaUserCog /> Manage Users</li>
+          <li><FaCheckCircle /> Approve/Reject Actions</li>
+          <li><FaCogs /> System Configuration</li>
+          <li><FaTachometerAlt /> View Dashboards</li>
+        </ul>
+      </aside>
 
-      <section className="dashboard-stats">
-        <div className="stat-card">
-          <h3>Total Samples</h3>
-          <p>{statistics.totalSamples}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Pending Tasks</h3>
-          <p>{statistics.pendingTasks}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Results Approved</h3>
-          <p>{statistics.resultsApproved}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Results Pending</h3>
-          <p>{statistics.resultsPending}</p>
-        </div>
-      </section>
+      {/* Main Content */}
+      <main className="content">
+        {/* Header */}
+        <header className="header">
+          <h1>Welcome, {adminName}</h1>
+          <p>Empowering the Blue Economy with seamless lab operations</p>
+        </header>
 
-      <section className="dashboard-tasks">
-        <h2>Pending Tasks</h2>
-        <table className="task-table">
-          <thead>
-            <tr>
-              <th>Sample ID</th>
-              <th>Customer</th>
-              <th>Sample Type</th>
-              <th>Date Received</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingTasks.map(task => (
-              <tr key={task.id}>
-                <td>{task.sampleId}</td>
-                <td>{task.customer}</td>
-                <td>{task.sampleType}</td>
-                <td>{task.dateReceived}</td>
-                <td>
-                  <button className="action-btn assign-btn">Assign to Head of Division</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+        {/* Stats Section */}
+        <section className="stats">
+          <div className="stat-card ocean-gradient">
+            <h3>Total Users</h3>
+            <p>{stats.totalUsers}</p>
+          </div>
+          <div className="stat-card ocean-gradient">
+            <h3>Total Samples</h3>
+            <p>{stats.totalSamples}</p>
+          </div>
+          <div className="stat-card ocean-gradient">
+            <h3>Total Tests</h3>
+            <p>{stats.totalTests}</p>
+          </div>
+          <div className="stat-card ocean-gradient">
+            <h3>Total Departments</h3>
+            <p>{stats.totalDepartments}</p>
+          </div>
+        </section>
 
-      <section className="dashboard-results">
-        <h2>Results for Approval</h2>
-        <table className="task-table">
-          <thead>
-            <tr>
-              <th>Sample ID</th>
-              <th>Technician</th>
-              <th>Status</th>
-              <th>Date Submitted</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {resultsToApprove.map(result => (
-              <tr key={result.id}>
-                <td>{result.sampleId}</td>
-                <td>{result.technician}</td>
-                <td>{result.status}</td>
-                <td>{result.dateSubmitted}</td>
-                <td>
-                  <button className="action-btn approve-btn">Approve</button>
-                  <button className="action-btn reject-btn">Reject</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+        {/* Recent Activity */}
+        <section className="recent-activity">
+          <h2>Recent Activities</h2>
+          {recentActivities.length > 0 ? (
+            <ul>
+              {recentActivities.map((activity, index) => (
+                <li key={index}>{activity}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No recent activities found.</p>
+          )}
+        </section>
+      </main>
     </div>
   );
 };

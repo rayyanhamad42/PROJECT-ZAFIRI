@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LabTechnicianDashboard.css';
-import logo from '../assets/zafiri.png'; // Reuse logo from login
+import logo from '../assets/zafiri.png';
+import { FaUser, FaHistory, FaFileSignature, FaTachometerAlt } from 'react-icons/fa';
 
 export default function LabTechnicianDashboard() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
 
-  // Dummy data for demonstration (replace with backend data later)
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    const storedUserData = localStorage.getItem("user_data");
+
+    if (storedUsername && storedUserData) {
+      const user = JSON.parse(storedUserData);
+      if (user.role === 'Technician') {
+        setUsername(storedUsername);
+      } else {
+        // Redirect to login if the user is not a Technician
+        navigate('/'); 
+      }
+    } else {
+      // If no user data is found, redirect to login
+      navigate("/");
+    }
+  }, [navigate]);
+
   const assignedTasks = [
     { id: 1, sample: 'Mwani Sample A', customer: 'John Doe', assignedDate: '2025-08-10', status: 'Pending' },
     { id: 2, sample: 'Mwani Sample B', customer: 'Jane Smith', assignedDate: '2025-08-11', status: 'In Progress' },
@@ -19,101 +38,123 @@ export default function LabTechnicianDashboard() {
   };
 
   const handleLogout = () => {
-    // Clear session or auth data (to be implemented)
-    navigate('/'); // Redirect to login
+    localStorage.removeItem("username");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    navigate('/');
   };
 
   const handleSubmitResult = (taskId) => {
-    // Navigate to result submission page (to be created)
     navigate(`/test-submission/${taskId}`);
   };
 
   const handleViewHistory = () => {
-    // Navigate to history page (to be created)
     navigate('/history');
   };
 
+  const menuItems = [
+    { name: 'Dashboard', icon: <FaTachometerAlt />, action: () => navigate('/technician-dashboard') },
+    { name: 'Submit Result', icon: <FaFileSignature />, action: () => handleSubmitResult(assignedTasks[0]?.id) },
+    { name: 'View History', icon: <FaHistory />, action: handleViewHistory },
+    { name: 'Profile', icon: <FaUser />, action: () => {} },
+  ];
+
   return (
     <div className="technician-dashboard-wrapper">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-left">
-          <img src={logo} alt="Zafiri Logo" className="dashboard-logo" />
-          <h1 className="dashboard-title">Lab Technician Dashboard</h1>
+      {/* Sidebar Navigation */}
+      <aside className="dashboard-sidebar">
+        <div className="sidebar-header">
+          <img src={logo} alt="Zafiri Logo" className="sidebar-logo" />
         </div>
-        <div className="header-right">
-          <span className="user-info">Welcome, Lab Technician</span>
+        <nav className="sidebar-nav">
+          <ul>
+            {menuItems.map((item, index) => (
+              <li key={index} className="nav-item">
+                <button className="nav-link" onClick={item.action}>
+                  {item.icon}
+                  <span>{item.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="sidebar-footer">
           <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
-      </header>
+      </aside>
 
-      {/* Main Content */}
-      <main className="dashboard-main">
-        {/* Statistics Cards */}
-        <section className="stats-section">
-          <div className="stat-card">
-            <h3>Pending Tasks</h3>
-            <p className="stat-number">{stats.pending}</p>
+      {/* Main Content Area */}
+      <div className="main-content">
+        <header className="dashboard-header">
+          <div className="header-info">
+            <h1 className="welcome-message">Welcome, {username}!</h1>
           </div>
-          <div className="stat-card">
-            <h3>In Progress</h3>
-            <p className="stat-number">{stats.inProgress}</p>
+          <div className="header-meta">
+            <span className="current-date">Today is Tuesday, Aug 12, 2025</span>
           </div>
-          <div className="stat-card">
-            <h3>Completed Tests</h3>
-            <p className="stat-number">{stats.completed}</p>
-          </div>
-        </section>
+        </header>
 
-        {/* Assigned Tasks Table */}
-        <section className="tasks-section">
-          <h2>Assigned Tasks</h2>
-          <table className="tasks-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Sample</th>
-                <th>Customer</th>
-                <th>Assigned Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assignedTasks.map((task) => (
-                <tr key={task.id}>
-                  <td>{task.id}</td>
-                  <td>{task.sample}</td>
-                  <td>{task.customer}</td>
-                  <td>{task.assignedDate}</td>
-                  <td>{task.status}</td>
-                  <td>
-                    <button
-                      className="action-btn"
-                      onClick={() => handleSubmitResult(task.id)}
-                    >
-                      Submit Result
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+        <main className="dashboard-main">
+          {/* Statistics Cards */}
+          <section className="stats-section">
+            <div className="stat-card">
+              <h3>Pending Tasks</h3>
+              <p className="stat-number">{stats.pending}</p>
+            </div>
+            <div className="stat-card">
+              <h3>In Progress</h3>
+              <p className="stat-number">{stats.inProgress}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Completed Tests</h3>
+              <p className="stat-number">{stats.completed}</p>
+            </div>
+          </section>
 
-        {/* Quick Actions */}
-        <section className="quick-actions">
-          <h2>Quick Actions</h2>
-          <button className="quick-btn" onClick={handleViewHistory}>
-            View Test History
-          </button>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="dashboard-footer">
-        <p>&copy; 2025 Marine Laboratory Management System. All rights reserved.</p>
-      </footer>
+          {/* Assigned Tasks Table */}
+          <section className="tasks-section">
+            <h2 className="section-title">Assigned Tasks</h2>
+            <div className="table-container">
+              <table className="tasks-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Sample</th>
+                    <th>Customer</th>
+                    <th>Assigned Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assignedTasks.map((task) => (
+                    <tr key={task.id}>
+                      <td>{task.id}</td>
+                      <td>{task.sample}</td>
+                      <td>{task.customer}</td>
+                      <td>{task.assignedDate}</td>
+                      <td>
+                        <span className={`status-badge ${task.status.toLowerCase().replace(' ', '-')}`}>
+                          {task.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="action-btn"
+                          onClick={() => handleSubmitResult(task.id)}
+                        >
+                          Submit Result
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
