@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         // Fetch stats
-        const statsResponse = await fetch("http://192.168.1.180:8000/api/admin-dashboard/", {
+        const statsResponse = await fetch("http://192.168.1.221:8000/api/admin-dashboard/", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
         }
 
         // Fetch recent activities
-        const activitiesResponse = await fetch("http://192.168.1.180:8000/api/recent-activities/", {
+        const activitiesResponse = await fetch("http://192.168.1.221:8000/api/recent-activities/", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

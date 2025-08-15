@@ -1,12 +1,12 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
   display: flex;
-  justify-content: center;
+  justify-content: center; 
   align-items: center;
-  position: relative; 
-  overflow: hidden; 
+  position: relative;
+  overflow: hidden;
 }
 .video-background {
   position: absolute;
@@ -17,7 +17,7 @@ body {
   width: auto;
   height: auto;
   transform: translateX(-50%) translateY(-50%);
-  z-index: -1; 
+  z-index: -1;
 }
 .login-wrapper {
   background: rgba(255, 255, 255, 0.8);
@@ -25,19 +25,18 @@ body {
   padding: 40px;
   border-radius: 25px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  width: 200%;
+  width: 200%; /* Imebadilishwa kutoka 200% kwenda 100% */
   max-width: 450px;
   text-align: center;
   animation: fadeIn 0.7s ease;
   box-sizing: border-box;
-  z-index: 1; /* Make sure this is higher than the video's z-index */
+  z-index: 1;
 }
 .login-header {
   margin-bottom: 30px;
 }
-
 .lock-icon {
-  background: linear-gradient(45deg, #1ca3de,white);
+  background: linear-gradient(45deg, #1ca3de, white);
   border-radius: 50%;
   width: 80px;
   height: 80px;
@@ -49,31 +48,26 @@ body {
   color: #fff;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
-
 .login-title {
   color: #1ca3de;
   font-size: 2em;
   font-weight: 600;
   margin: 0;
 }
-
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .input-group {
   text-align: left;
 }
-
 .input-group label {
   display: block;
   font-weight: 500;
   color: #555;
   margin-bottom: 5px;
 }
-
 .input-group input {
   width: 100%;
   padding: 15px;
@@ -83,33 +77,31 @@ body {
   font-size: 1em;
   transition: border-color 0.3s;
 }
-
 .input-group input:focus {
   border-color: #1ca3de;
-  outline: none;}
+  outline: none;
+}
 .logo {
- width: 200px;
- height: auto;
- margin: 0 auto 20px auto;
- animation: rotate 2s linear infinite;
- transform-origin: center;
- 
+  width: 200px;
+  height: auto;
+  margin: 0 auto 20px auto;
+  transform-origin: center;
+  transition: transform 0.2s ease-in-out;
 }
-
+.animate-rotation {
+  animation: rotate 1s linear infinite;
+}
 @keyframes rotate {
- 0% {
-   transform: rotate(0deg) scale(1); 
- }
- 50% {
-   transform: rotate(180deg) scale(1.1); 
- }
- 100% {
-   transform: rotate(360deg) scale(1); 
- }
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
-
-
-
 .login-btn {
   background-color: #1ca3de;
   color: #fff;
@@ -121,12 +113,10 @@ body {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -137,23 +127,18 @@ body {
     transform: translateY(0);
   }
 }
-
-/* Add this to your Login.css file */
-
 .input-with-icon {
   position: relative;
   width: 100%;
 }
-
 .input-with-icon input {
-  padding-left: 40px; /* Add padding to the left to make space for the icon */
+  padding-left: 40px;
 }
-
 .input-icon {
   position: absolute;
   top: 50%;
   left: 10px;
   transform: translateY(-50%);
-  color: #1CA3DE; /* Use your brand color for the icons */
+  color: #1ca3de;
   font-size: 1.2em;
 }
