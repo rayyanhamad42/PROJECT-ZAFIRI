@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import LabTechnicianDashboard from './pages/LabTechnicianDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import RegistrarDashboard from './pages/RegistrarDashboard'; 
+import HeadOfDepartmentDashboard from './pages/HeadOfDepartmentDashboard';
 function App() {
   return (
   
@@ -14,6 +15,7 @@ function App() {
           <Route path="/technician-dashboard" element={<LabTechnicianDashboard />} /> 
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/Registrar-dashboard" element={<RegistrarDashboard />} />
+          <Route path="/hod-dashboard" element={<HeadOfDepartmentDashboard />} />
         </Routes>
       </div>
   );

@@ -1,18 +1,26 @@
-/* =======================================
-   Modified Admin Dashboard Styles
-   ======================================= */
 
-.admin-dashboard {
+.hod-dashboard {
   display: flex;
   min-height: 100vh;
-  background-color: #ffffff; /* White background for Blue Economy */
+  background-color: #ffffff;
   color: #333;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.error-message {
+  color: #1CA3DE;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: rgba(28, 163, 222, 0.1);
+  border-radius: 5px;
+  border: 1px solid #1CA3DE;
+}
+
 /* Sidebar */
 .sidebar {
-  background: #1ca3de; /* Ocean blue */
+  background: #1CA3DE;
   color: #ffffff;
   padding: 20px;
   width: 280px;
@@ -32,9 +40,7 @@
 .sidebar .logo img.dashboard-logo {
   width: 60px;
   height: auto;
-  transform-origin: center;
 }
-
 
 .sidebar .menu {
   list-style: none;
@@ -57,14 +63,15 @@
 }
 
 .sidebar .menu li:hover {
-  background-color: #1688b8; /* Darker ocean blue */
+  background-color: rgba(255, 255, 255, 0.2);
   transform: translateX(5px);
 }
 
 .sidebar .menu .active {
-  background: linear-gradient(90deg, #1ca3de, #00bfff);
-  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+  background: #ffffff;
+  color: #1CA3DE;
   font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Main Content */
@@ -85,7 +92,7 @@
 }
 
 .header-left h1 {
-  color: #1ca3de;
+  color: #1CA3DE;
   font-size: 2.5rem;
   font-weight: 700;
 }
@@ -97,7 +104,7 @@
 }
 
 .logout-btn {
-  background-color: #1ca3de;
+  background-color: #1CA3DE;
   color: #ffffff;
   border: none;
   padding: 10px 20px;
@@ -111,7 +118,7 @@
 }
 
 .logout-btn:hover {
-  background-color: #1688b8;
+  background-color: #0088cc;
   transform: translateY(-2px);
 }
 
@@ -129,7 +136,7 @@
 
 .stat-card {
   padding: 30px;
-  background: linear-gradient(45deg, #1ca3de, #00bfff); /* Ocean gradient */
+  background-color: #1CA3DE;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
@@ -166,11 +173,11 @@
   margin-bottom: 40px;
 }
 
-.overview-section h2, .dashboards-section h2, .recent-activity h2 {
+.overview-section h2, .recent-activity h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #1ca3de;
+  color: #1CA3DE;
 }
 
 .section-icon {
@@ -189,12 +196,12 @@
 }
 
 .overview-table th {
-  background-color: #1ca3de;
+  background-color: #1CA3DE;
   color: #ffffff;
 }
 
 .action-btn {
-  background-color: #1ca3de;
+  background-color: #1CA3DE;
   color: #ffffff;
   border: none;
   padding: 8px 12px;
@@ -208,39 +215,23 @@
 }
 
 .action-btn:hover {
-  background-color: #1688b8;
+  background-color: #0088cc;
   transform: translateY(-2px);
 }
 
 .approve-btn {
   background-color: #ffffff;
-  color: #1ca3de;
-  border: 2px solid #1ca3de;
+  color: #1CA3DE;
+  border: 2px solid #1CA3DE;
 }
 
 .approve-btn:hover {
   background-color: #e0f7fa;
-  color: #1688b8;
+  color: #1CA3DE;
 }
 
 .btn-icon {
   font-size: 1.2em;
-}
-
-/* Dashboards Section */
-.dashboards-section {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
-}
-
-.dashboard-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
 }
 
 /* Recent Activity */
@@ -259,7 +250,7 @@
 }
 
 .recent-activity li {
-  background-color: #f0f8ff; /* Light aquamarine */
+  background-color: rgba(28, 163, 222, 0.1);
   padding: 15px 20px;
   margin-bottom: 10px;
   border-radius: 10px;
@@ -280,7 +271,7 @@
 }
 
 .quick-btn {
-  background-color: #1ca3de;
+  background-color: #1CA3DE;
   color: #ffffff;
   border: none;
   padding: 15px 30px;
@@ -303,9 +294,9 @@
   font-size: 1.2em;
 }
 
-/* Footer */
+
 footer {
-  background-color: #1ca3de;
+  background-color: #1CA3DE;
   color: #ffffff;
   text-align: center;
   padding: 10px;

@@ -3,6 +3,9 @@ import "./RegistrarDashboard.css";
 
 export default function RegistrarDashboard() {
   const [customerName, setCustomerName] = useState("");
+  const[customerphone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("")
   const [sampleType, setSampleType] = useState("");
   const [testType, setTestType] = useState("");
   const [controlNumber, setControlNumber] = useState("");
@@ -21,9 +24,11 @@ export default function RegistrarDashboard() {
     e.preventDefault();
     alert("Details submitted to HOD successfully!");
     setCustomerName("");
+    setCustomerPhone("");
+    setCustomerEmail("");
+    setCustomerAddress("");
     setSampleType("");
     setTestType("");
-    setControlNumber("");
   };
 
   const checkPaymentStatus = () => {
@@ -47,7 +52,32 @@ export default function RegistrarDashboard() {
           placeholder="Enter customer name"
           required
         />
+<label>Customer Phone</label>
+        <input
+          type="text"
+          value={customerphone}
+          onChange={(e) => setCustomerPhone(e.target.value)}
+          placeholder="Enter customer phone"
+          required
+        />
 
+        <label>Customer Email</label>
+        <input
+          type="email"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+          placeholder="Enter customer email"
+          required
+        />
+
+        <label>Customer Address</label>
+        <input
+          type="text"
+          value={customerAddress}
+          onChange={(e) => setCustomerAddress(e.target.value)}
+          placeholder="Enter customer address"
+          required
+        />
         <label>Sample Type</label>
         <input
           type="text"
