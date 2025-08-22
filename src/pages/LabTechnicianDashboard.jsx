@@ -17,11 +17,9 @@ export default function LabTechnicianDashboard() {
       if (user.role === 'Technician') {
         setUsername(storedUsername);
       } else {
-        // Redirect to login if the user is not a Technician
         navigate('/'); 
       }
     } else {
-      // If no user data is found, redirect to login
       navigate("/");
     }
   }, [navigate]);
@@ -91,7 +89,7 @@ export default function LabTechnicianDashboard() {
             <h1 className="welcome-message">Welcome, {username}!</h1>
           </div>
           <div className="header-meta">
-            <span className="current-date">Today is Tuesday, Aug 12, 2025</span>
+            <span className="current-date">Today is Monday, Aug 18, 2025</span>
           </div>
         </header>
 

@@ -1,145 +1,234 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Login.css';
-import logo from '../assets/zafiri.png';
-import oceanVideo from '../assets/marine video2.mp4';
-import { FaUser, FaLock } from 'react-icons/fa';
+ import { useNavigate } from 'react-router-dom';
+ import './Login.css';
+ import logo from '../assets/zafiri.png';
+ import abstractBackground  from '../assets/background_img2.png';
+ import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'; // Import the eye icons
 
-export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [isAnimating, setIsAnimating] = useState(false); // New state for animation
-  const navigate = useNavigate();
+ export default function Login() {
+   const [username, setUsername] = useState('');
+   const [password, setPassword] = useState('');
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState('');
+   const [isAnimating, setIsAnimating] = useState(false);
+   const navigate = useNavigate();
+   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setIsAnimating(true); // Start the animation when the button is clicked
+   const togglePasswordVisibility = () => {
+     setShowPassword(!showPassword);
+   };
 
-    try {
-      const response = await fetch('http://192.168.1.221:8000/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+   const handleSubmit = async (e) => {
+     e.preventDefault();
+     setLoading(true);
+     setError('');
+     setIsAnimating(true);
 
-      const data = await response.json();
+     // Weka msimbo wote wa API ndani ya comment block.
+     
+     try {
+       const response = await fetch('http://192.168.1.180:8000/api/auth/login/', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+           username: username,
+           password: password,
+         }),
+       });
 
-      if (data.success) {
-        localStorage.setItem('access_token', data.tokens.access);
-        localStorage.setItem('refresh_token', data.tokens.refresh);
-        localStorage.setItem('user_data', JSON.stringify(data.user));
-        localStorage.setItem('username', data.user.username);
+       const data = await response.json();
 
-        console.log('Login successful!', data.user);
+       if (data.success) {
+         localStorage.setItem('access_token', data.tokens.access);
+         localStorage.setItem('refresh_token', data.tokens.refresh);
+         localStorage.setItem('user_data', JSON.stringify(data.user));
+         localStorage.setItem('username', data.user.username);
 
-        // Wait for a brief moment (e.g., 2 seconds) before navigating to let the animation play
-        setTimeout(() => {
-          setIsAnimating(false); // Stop animation before navigating
-          switch (data.user.role) {
-            case 'Technician':
-              navigate('/technician-dashboard');
-              break;
-            case 'Admin':
-              navigate('/admin-dashboard');
-              break;
-            case 'HOD':
-              navigate('/hod-dashboard');
-              break;
-            case 'Registrar':
-              navigate('/registrar-dashboard');
-              break;
-            case 'Director':
-              navigate('/director-dashboard');
-              break;
-            default:
-              setError('User role not supported.');
-          }
-        }, 2000); // Wait for 2 seconds (or the duration of your animation)
-      } else {
-        setError(data.message || 'Login failed. Please try again.');
-        setIsAnimating(false); // Stop animation on error
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('Network error. Please check your connection.');
-      setIsAnimating(false); // Stop animation on network error
-    } finally {
-      // The `finally` block might be a good place to stop the animation
-      // if you don't want to wait for the `setTimeout`.
-      // For this implementation, we will stop it inside the `setTimeout`.
-      // setLoading(false); // We'll move this into the `setTimeout` as well for smoother transition
-    }
-  };
+         console.log('Login successful!', data.user);
 
-  return (
-    <>
-      <video autoPlay loop muted className="video-background">
-        <source src={oceanVideo} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <div className="login-wrapper">
-        <div className="login-header">
-          <img
-            src={logo}
-            alt="Zafiri Logo"
-            className={`logo ${isAnimating ? 'animate-rotation' : ''}`} // Conditionally apply the class
-          />
-          <h2 className="login-title">Login Now</h2>
-        </div>
+         setTimeout(() => {
+           setIsAnimating(false);
+           switch (data.user.role) {
+             case 'Technician':
+               navigate('/technician-dashboard');
+               break;
+             case 'Admin':
+               navigate('/admin-dashboard');
+               break;
+             case 'HOD':
+               navigate('/hod-dashboard');
+               break;
+             case 'Registrar':
+               navigate('/registrar-dashboard');
+               break;
+             case 'Director':
+               navigate('/director-dashboard');
+               break;
+             default:
+               setError('User role not supported.');
+           }
+         }, 100);
+       } else {
+         setError(data.message || 'Login failed. Please try again.');
+         setIsAnimating(false);
+       }
+     } catch (error) {
+       console.error('Login error:', error);
+       setError('Network error. Please check your connection.');
+       setIsAnimating(false);
+     } finally {
+       // setLoading(false);
+     }
+     
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          {error && (
-            <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
-              {error}
-            </div>
-          )}
+     // Watumiaji wa majaribio
+     const testUsers = [
+       { username: 'labtech', password: 'password123', role: 'Technician' },
+       { username: 'admin', password: 'password123', role: 'Admin' },
+       { username: 'registrar', password: 'password123', role: 'Registrar' },
+       {username:'HOD', password: 'password123', role:'HOD'}
+     ];
 
-          <div className="input-group">
-            <label htmlFor="username">Username </label>
-            <div className="input-with-icon">
-              <FaUser className="input-icon" />
-              <input
-                type="text"
-                id="username"
-                placeholder="Enter your Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-          </div>
+     // Hii ndio code mbadala inayofanya kazi sasa
+     // Inafanana na API lakini inarudisha data ya majaribio moja kwa moja
+     const simulatedLogin = () => {
+       return new Promise((resolve, reject) => {
+         setTimeout(() => {
+           const userFound = testUsers.find(
+             (user) => user.username === username && user.password === password
+           );
 
-          <div className="input-group">
-            <label htmlFor="password">Password </label>
-            <div className="input-with-icon">
-              <FaLock className="input-icon" />
-              <input
-                type="password"
-                id="password"
-                placeholder="Enter your Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-          </div>
+           if (userFound) {
+             resolve({
+               success: true,
+               tokens: { access: 'mock-access-token', refresh: 'mock-refresh-token' },
+               user: userFound,
+             });
+           } else {
+             reject({
+               success: false,
+               message: 'Invalid username or password.',
+             });
+           }
+         }, 1000);
+       });
+     };
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? 'LOGGING IN...' : 'LOGIN'}
-          </button>
-        </form>
+     try {
+       const data = await simulatedLogin();
+
+       if (data.success) {
+         localStorage.setItem('access_token', data.tokens.access);
+         localStorage.setItem('refresh_token', data.tokens.refresh);
+         localStorage.setItem('user_data', JSON.stringify(data.user));
+         localStorage.setItem('username', data.user.username);
+
+         console.log('Login successful!', data.user);
+
+         setTimeout(() => {
+           setIsAnimating(false);
+           switch (data.user.role) {
+             case 'Technician':
+               navigate('/technician-dashboard');
+               break;
+             case 'Admin':
+               navigate('/admin-dashboard');
+               break;
+             case 'HOD':
+               navigate('/hod-dashboard');
+               break;
+             case 'Registrar':
+               navigate('/registrar-dashboard');
+               break;
+             case 'Director':
+               navigate('/director-dashboard');
+               break;
+             default:
+               setError('User role not supported.');
+           }
+         }, 100);
+       } else {
+         setError(data.message || 'Login failed. Please try again.');
+         setIsAnimating(false);
+       }
+     } catch (error) {
+       console.error('Login error:', error);
+       setError(error.message || 'An unexpected error occurred.');
+       setIsAnimating(false);
+     } finally {
+       setLoading(false);
+     }
+   };
+
+   return (
+     <>
+         <div className="page-container"> {/* New wrapper for centering */}
+      <img src={abstractBackground} alt="Abstract Blue Background" className="background-image" />
+
       </div>
-    </>
-  );
-}
+       <div className="login-wrapper">
+         <div className="login-header">
+           <img
+             src={logo}
+             alt="Zafiri Logo"
+             className={`logo ${isAnimating ? 'animate-rotation' : ''}`}
+           />
+           <h2 className="login-title">Login Now</h2>
+         </div>
+
+         <form className="login-form" onSubmit={handleSubmit}>
+           {error && (
+             <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
+               {error}
+             </div>
+           )}
+
+           <div className="input-group">
+             <label htmlFor="username">Username </label>
+             <div className="input-with-icon">
+               <FaUser className="input-icon" />
+               <input
+                 type="text"
+                 id="username"
+                 placeholder="Enter your Username"
+                 value={username}
+                 onChange={(e) => setUsername(e.target.value)}
+                 required
+                 disabled={loading}
+               />
+             </div>
+           </div>
+
+           <div className="input-group">
+             <label htmlFor="password">Password </label>
+             <div className="input-with-icon password-input-wrapper"> {/* Added a wrapper for password input and icon */}
+               <FaLock className="input-icon" />
+               <input
+                 type={showPassword ? 'text' : 'password'} // Toggle input type based on state
+                 id="password"
+                 placeholder="Enter your Password"
+                 value={password}
+                 onChange={(e) => setPassword(e.target.value)}
+                 required
+                 disabled={loading}
+               />
+               <span
+                 className="password-toggle-icon" // Added a span for the toggle icon
+                 onClick={togglePasswordVisibility}
+                 style={{ cursor: 'pointer' }}
+               >
+                 {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Toggle between eye and eye-slash icons */}
+               </span>
+             </div>
+           </div>
+
+           <button type="submit" className="login-btn" disabled={loading}>
+             {loading ? 'LOGGING IN...' : 'LOGIN'}
+           </button>
+         </form>
+       </div>
+     </>
+   );
+ }
