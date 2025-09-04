@@ -86,8 +86,7 @@ import React, { useState } from 'react';
        { username: 'labtech', password: 'password123', role: 'Technician' },
        { username: 'admin', password: 'password123', role: 'Admin' },
        { username: 'registrar', password: 'password123', role: 'Registrar' },
-       {username:'HOD', password: 'password123', role:'HOD'},
-       {username:'Director', password: 'password123', role:'Director'},
+       {username:'HOD', password: 'password123', role:'HOD'}
      ];
 
  
