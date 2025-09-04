@@ -1,7 +1,6 @@
-// src/components/Layout.jsx
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaUserCircle, FaSignOutAlt, FaUser, FaCog } from "react-icons/fa"; 
 import './Layout.css';
 import logo from '../assets/zafiri.png';
 
@@ -46,13 +45,15 @@ const Layout = ({ children, menuItems = [] }) => {
           </div>
 
           <div className="user-profile" onClick={toggleDropdown}>
-            <FaUser className="user-icon" />
+            {/* The professional user icon */}
+            <FaUserCircle className="user-icon" />
             {isDropdownOpen && (
               <div className="user-dropdown">
                 <div className="dropdown-item">
                   <FaUser className="dropdown-icon" /> Profile
                 </div>
-                <div className="dropdown-item" onClick={handleLogout}>
+               
+                <div className="dropdown-item logout-item" onClick={handleLogout}>
                   <FaSignOutAlt className="dropdown-icon" /> Logout
                 </div>
               </div>
