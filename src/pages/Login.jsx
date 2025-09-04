@@ -2,8 +2,8 @@ import React, { useState } from 'react';
  import { useNavigate } from 'react-router-dom';
  import './Login.css';
  import logo from '../assets/zafiri.png';
- import abstractBackground  from '../assets/background_img2.png';
- import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'; // Import the eye icons
+ import abstractBackground  from '../assets/backgroundimg6.png';
+ import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'; 
 
  export default function Login() {
    const [username, setUsername] = useState('');
@@ -12,7 +12,7 @@ import React, { useState } from 'react';
    const [error, setError] = useState('');
    const [isAnimating, setIsAnimating] = useState(false);
    const navigate = useNavigate();
-   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+   const [showPassword, setShowPassword] = useState(false); 
 
    const togglePasswordVisibility = () => {
      setShowPassword(!showPassword);
@@ -24,7 +24,6 @@ import React, { useState } from 'react';
      setError('');
      setIsAnimating(true);
 
-     // Weka msimbo wote wa API ndani ya comment block.
      
      try {
        const response = await fetch('http://192.168.1.180:8000/api/auth/login/', {
@@ -83,16 +82,15 @@ import React, { useState } from 'react';
      }
      
 
-     // Watumiaji wa majaribio
      const testUsers = [
        { username: 'labtech', password: 'password123', role: 'Technician' },
        { username: 'admin', password: 'password123', role: 'Admin' },
        { username: 'registrar', password: 'password123', role: 'Registrar' },
-       {username:'HOD', password: 'password123', role:'HOD'}
+       {username:'HOD', password: 'password123', role:'HOD'},
+       {username:'Director', password: 'password123', role:'Director'},
      ];
 
-     // Hii ndio code mbadala inayofanya kazi sasa
-     // Inafanana na API lakini inarudisha data ya majaribio moja kwa moja
+ 
      const simulatedLogin = () => {
        return new Promise((resolve, reject) => {
          setTimeout(() => {
@@ -164,7 +162,7 @@ import React, { useState } from 'react';
 
    return (
      <>
-         <div className="page-container"> {/* New wrapper for centering */}
+         <div className="page-container"> 
       <img src={abstractBackground} alt="Abstract Blue Background" className="background-image" />
 
       </div>
@@ -203,10 +201,10 @@ import React, { useState } from 'react';
 
            <div className="input-group">
              <label htmlFor="password">Password </label>
-             <div className="input-with-icon password-input-wrapper"> {/* Added a wrapper for password input and icon */}
+             <div className="input-with-icon password-input-wrapper"> 
                <FaLock className="input-icon" />
                <input
-                 type={showPassword ? 'text' : 'password'} // Toggle input type based on state
+                 type={showPassword ? 'text' : 'password'}
                  id="password"
                  placeholder="Enter your Password"
                  value={password}
@@ -215,11 +213,11 @@ import React, { useState } from 'react';
                  disabled={loading}
                />
                <span
-                 className="password-toggle-icon" // Added a span for the toggle icon
+                 className="password-toggle-icon" 
                  onClick={togglePasswordVisibility}
                  style={{ cursor: 'pointer' }}
                >
-                 {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Toggle between eye and eye-slash icons */}
+                 {showPassword ? <FaEyeSlash /> : <FaEye />} 
                </span>
              </div>
            </div>

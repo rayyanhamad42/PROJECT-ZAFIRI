@@ -54,7 +54,7 @@
         }
 
         .logo {
-          width: 300px;
+          width: 250px;
           height: auto;
           margin: 0 auto 20px auto;
           transform-origin: center;
@@ -74,7 +74,7 @@
         }
 
         .login-title {
-          color:#fff;
+          color:#1ca3de;
           font-size: 1.5em;
           font-weight: 400;
           margin: 0;

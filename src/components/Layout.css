@@ -1,0 +1,47 @@
+/* User Dropdown */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;   /* <-- more rounded */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 10;
+  margin-top: 10px;
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+/* Items inside dropdown */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background-color: #f4f7f9;
+}
+
+/* Logout red hover */
+.logout-item:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.logout-item:hover .dropdown-icon {
+  color: #fff;
+}
+
+/* Icons */
+.dropdown-icon {
+  font-size: 1rem;
+  color: #1CA3DE;
+}

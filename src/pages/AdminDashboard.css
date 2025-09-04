@@ -78,6 +78,12 @@ box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
 font-weight: 600;
 }
 
+
+.sidebar-footer {
+  margin-top: auto; /* ✅ makes sure footer is always at bottom */
+  padding: 50px;
+}
+
 /* Main Content */
 .content {
 flex: 1;
@@ -326,3 +332,38 @@ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 .quick-btn .btn-icon {
 font-size: 1.2em;
 }
+
+.add-user-form {
+  background: #fff;
+  padding: 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1; /* Ensure it’s above other elements */
+}
+.add-user-form input, .add-user-form select {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+}
+.submit-btn, .cancel-btn {
+  margin-right: 10px;
+  padding: 8px 16px;
+  background: #1CA3DE;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.cancel-btn {
+  background: #ccc;
+}
+.submit-btn:disabled, .cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.error-message { color: red; margin: 10px 0; }
+.success-message { color: green; margin: 10px 0; }
+.loading-message { color: #666; margin: 10px 0; }

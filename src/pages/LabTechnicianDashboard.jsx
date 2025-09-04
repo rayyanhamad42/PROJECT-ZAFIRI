@@ -1,118 +1,84 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './LabTechnicianDashboard.css';
-import logo from '../assets/zafiri.png';
-import { FaUser, FaHistory, FaFileSignature, FaTachometerAlt } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { FaTachometerAlt, FaFileSignature, FaHistory, FaUser, FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 
 export default function LabTechnicianDashboard() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
+  const [assignedTests, setAssignedTests] = useState([]);
+  const [stats, setStats] = useState({ pending: 0, inProgress: 0, completed: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Mock fetch function
+  const fetchTests = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = {
+        success: true,
+        tests: [
+          { id: 1, ingredient: { name: "Test A" }, status: "Pending", sample: { control_number: "C001", customer: { name: "John" }, date_received: "2025-09-01" }, assigned_by_hod: { name: "HOD1" } },
+          { id: 2, ingredient: { name: "Test B" }, status: "In Progress", sample: { control_number: "C002", customer: { name: "Jane" }, date_received: "2025-09-02" }, assigned_by_hod: { name: "HOD2" } },
+        ]
+      };
+      setAssignedTests(data.tests);
+      // Store in localStorage for TestSubmission page
+      localStorage.setItem("assignedTests", JSON.stringify(data.tests));
+    } catch (err) {
+      setError("Failed to load assigned tests.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    const storedUserData = localStorage.getItem("user_data");
+    const storedUsername = localStorage.getItem("username") || "TechnicianUser";
+    setUsername(storedUsername);
+    fetchTests();
+  }, []);
 
-    if (storedUsername && storedUserData) {
-      const user = JSON.parse(storedUserData);
-      if (user.role === 'Technician') {
-        setUsername(storedUsername);
-      } else {
-        navigate('/'); 
-      }
-    } else {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  const assignedTasks = [
-    { id: 1, sample: 'Mwani Sample A', customer: 'John Doe', assignedDate: '2025-08-10', status: 'Pending' },
-    { id: 2, sample: 'Mwani Sample B', customer: 'Jane Smith', assignedDate: '2025-08-11', status: 'In Progress' },
-  ];
-
-  const stats = {
-    pending: 2,
-    inProgress: 1,
-    completed: 3,
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("username");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_data");
-    navigate('/');
-  };
-
-  const handleSubmitResult = (taskId) => {
-    navigate(`/test-submission/${taskId}`);
-  };
-
-  const handleViewHistory = () => {
-    navigate('/history');
-  };
+  useEffect(() => {
+    setStats({
+      pending: assignedTests.filter(t => t.status === "Pending").length,
+      inProgress: assignedTests.filter(t => t.status === "In Progress").length,
+      completed: assignedTests.filter(t => t.status === "Completed").length,
+    });
+  }, [assignedTests]);
 
   const menuItems = [
-    { name: 'Dashboard', icon: <FaTachometerAlt />, action: () => navigate('/technician-dashboard') },
-    { name: 'Submit Result', icon: <FaFileSignature />, action: () => handleSubmitResult(assignedTasks[0]?.id) },
-    { name: 'View History', icon: <FaHistory />, action: handleViewHistory },
-    { name: 'Profile', icon: <FaUser />, action: () => {} },
+    { name: "Dashboard", path: "/technician-dashboard", icon: <FaTachometerAlt /> },
+    { name: "View History", path: "/history", icon: <FaHistory /> },
+    { name: "Profile", path: "/profile", icon: <FaUser /> },
   ];
 
   return (
-    <div className="technician-dashboard-wrapper">
-      {/* Sidebar Navigation */}
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <img src={logo} alt="Zafiri Logo" className="sidebar-logo" />
-        </div>
-        <nav className="sidebar-nav">
-          <ul>
-            {menuItems.map((item, index) => (
-              <li key={index} className="nav-item">
-                <button className="nav-link" onClick={item.action}>
-                  {item.icon}
-                  <span>{item.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
-      </aside>
+    <Layout menuItems={menuItems}>
+      <div className="dashboard-content">
 
-      {/* Main Content Area */}
-      <div className="main-content">
-        <header className="dashboard-header">
-          <div className="header-info">
-            <h1 className="welcome-message">Welcome, {username}!</h1>
+        <section className="stats-section">
+          <div className="stat-card">
+            <h3>Pending Tasks</h3>
+            <p className="stat-number">{stats.pending}</p>
           </div>
-          <div className="header-meta">
-            <span className="current-date">Today is Monday, Aug 18, 2025</span>
+          <div className="stat-card">
+            <h3>In Progress</h3>
+            <p className="stat-number">{stats.inProgress}</p>
           </div>
-        </header>
+          <div className="stat-card">
+            <h3>Completed Tests</h3>
+            <p className="stat-number">{stats.completed}</p>
+          </div>
+        </section>
 
-        <main className="dashboard-main">
-          {/* Statistics Cards */}
-          <section className="stats-section">
-            <div className="stat-card">
-              <h3>Pending Tasks</h3>
-              <p className="stat-number">{stats.pending}</p>
-            </div>
-            <div className="stat-card">
-              <h3>In Progress</h3>
-              <p className="stat-number">{stats.inProgress}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Completed Tests</h3>
-              <p className="stat-number">{stats.completed}</p>
-            </div>
-          </section>
-
-          {/* Assigned Tasks Table */}
-          <section className="tasks-section">
-            <h2 className="section-title">Assigned Tasks</h2>
+        <section className="tasks-section">
+          <h2 className="section-title">Assigned Tests</h2>
+          {loading ? (
+            <p>Loading...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : (
             <div className="table-container">
               <table className="tasks-table">
                 <thead>
@@ -120,29 +86,30 @@ export default function LabTechnicianDashboard() {
                     <th>ID</th>
                     <th>Sample</th>
                     <th>Customer</th>
+                    <th>Test Type</th>
                     <th>Assigned Date</th>
+                    <th>Assigned By</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assignedTasks.map((task) => (
-                    <tr key={task.id}>
-                      <td>{task.id}</td>
-                      <td>{task.sample}</td>
-                      <td>{task.customer}</td>
-                      <td>{task.assignedDate}</td>
-                      <td>
-                        <span className={`status-badge ${task.status.toLowerCase().replace(' ', '-')}`}>
-                          {task.status}
-                        </span>
-                      </td>
+                  {assignedTests.map(test => (
+                    <tr key={test.id}>
+                      <td>{test.id}</td>
+                      <td>{test.sample?.control_number || "N/A"}</td>
+                      <td>{test.sample?.customer?.name || "N/A"}</td>
+                      <td>{test.ingredient?.name || "N/A"}</td>
+                      <td>{test.sample?.date_received || "N/A"}</td>
+                      <td>{test.assigned_by_hod?.name || "N/A"}</td>
+                      <td>{test.status}</td>
                       <td>
                         <button
                           className="action-btn"
-                          onClick={() => handleSubmitResult(task.id)}
+                          disabled={test.status === "Completed"}
+                          onClick={() => navigate(`/submit-result/${test.id}`)}
                         >
-                          Submit Result
+                          <FaEdit /> Submit Result
                         </button>
                       </td>
                     </tr>
@@ -150,9 +117,9 @@ export default function LabTechnicianDashboard() {
                 </tbody>
               </table>
             </div>
-          </section>
-        </main>
+          )}
+        </section>
       </div>
-    </div>
+    </Layout>
   );
 }

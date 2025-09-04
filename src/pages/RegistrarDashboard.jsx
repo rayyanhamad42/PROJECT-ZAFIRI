@@ -1,19 +1,21 @@
+// src/pages/RegistrarDashboard.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
-  FaSignOutAlt,
   FaTachometerAlt,
   FaFlask,
   FaUserPlus,
   FaHistory,
   FaPlusCircle,
 } from "react-icons/fa";
-import Select from 'react-select';
-import logo from "../assets/zafiri.png";
+import Select from "react-select";
+import Layout from "../components/Layout";
 import "./RegistrarDashboard.css";
 
 export default function RegistrarDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [registrarName] = useState(localStorage.getItem("username") || "Registrar");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -21,84 +23,107 @@ export default function RegistrarDashboard() {
   const [customerAddress, setCustomerAddress] = useState("");
   const [controlNumber, setControlNumber] = useState("");
   const [sampleName, setSampleName] = useState("");
+
   const [paymentStatus, setPaymentStatus] = useState({});
-  const [paymentDetails, setPaymentDetails] = useState({});
+  const [paymentDetails, setPaymentDetails] = useState({}); // kept for future use
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [token] = useState(localStorage.getItem("access_token"));
-  const [activeMenu, setActiveMenu] = useState("register-sample");
   const [ingredients, setIngredients] = useState([]);
   const [microIngredients, setMicroIngredients] = useState([]);
   const [chemIngredients, setChemIngredients] = useState([]);
   const [samples, setSamples] = useState([]);
+  const [pendingTests, setPendingTests] = useState([]);
+
   const MARKING_FEE = 10000.0;
 
   const [samplesToAdd, setSamplesToAdd] = useState([
     { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
   ]);
 
-  useEffect(() => {
-    const fetchIngredients = async () => {
-      if (!token) return;
-      try {
-        const response = await fetch("http://192.168.1.180:8000/api/ingredients/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error("Failed to fetch ingredients.");
-        const data = await response.json();
-        setIngredients(data);
-        const micro = data.filter((ing) => ing.test_type === "Microbiology");
-        const chem = data.filter((ing) => ing.test_type === "Chemistry");
-        setMicroIngredients(micro);
-        setChemIngredients(chem);
-      } catch (err) {
-        console.error("Error fetching ingredients:", err);
-        setError("Failed to load test options. Please refresh.");
-      }
-    };
+  // Menu for Layout (same style as other dashboards)
+  const menuItems = [
+    { name: "Dashboard", path: "/registrar-dashboard", icon: <FaTachometerAlt /> },
+    { name: "Register Sample", path: "/registrar-dashboard/register-sample", icon: <FaUserPlus /> },
+    { name: "Verify Payment", path: "/registrar-dashboard/verify-payment", icon: <FaFlask /> },
+    { name: "Sample History", path: "/registrar-dashboard/sample-history", icon: <FaHistory /> },
+  ];
 
-    const fetchSamples = async () => {
+  // Determine active tab from URL
+  const pathname = location.pathname || "";
+  const activeTab =
+    pathname.endsWith("/verify-payment")
+      ? "verify-payment"
+      : pathname.endsWith("/sample-history")
+      ? "sample-history"
+      : pathname.endsWith("/registrar-dashboard")
+      ? "dashboard"
+      : "register-sample"; // default when path is /registrar-dashboard/register-sample or others
+
+  useEffect(() => {
+    const fetchIngredientsAndDashboard = async () => {
       if (!token) return;
       try {
-        const response = await fetch("http://192.168.1.180:8000/api/registrar-samples/", {
+        // Ingredients
+        const ingredientsResponse = await fetch("http://192.168.1.180:8000/api/ingredients/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch samples.");
-        const data = await response.json();
-        setSamples(data.samples || []);
+        if (ingredientsResponse.ok) {
+          const ingredientsData = await ingredientsResponse.json();
+          const allIngredients = ingredientsData.ingredients || [];
+          setIngredients(allIngredients);
+          setMicroIngredients(allIngredients.filter((ing) => ing.test_type === "Microbiology"));
+          setChemIngredients(allIngredients.filter((ing) => ing.test_type === "Chemistry"));
+        } else {
+          const errorText = await ingredientsResponse.text();
+          console.warn("Ingredients fetch failed:", ingredientsResponse.status, errorText);
+          setError("Cannot load test options. Please contact an Admin to set up ingredients.");
+        }
+
+        // Dashboard data
+        const dashboardResponse = await fetch("http://192.168.1.180:8000/api/dashboard/registrar/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!dashboardResponse.ok) throw new Error("Failed to fetch dashboard data.");
+
+        const dashboardData = await dashboardResponse.json();
+        const recent = dashboardData.recent_samples || [];
+        setSamples(recent);
+
         const initialStatus = {};
-        (data.samples || []).forEach((s) => {
+        recent.forEach((s) => {
           initialStatus[s.control_number] = s.payment?.status || "Pending";
         });
         setPaymentStatus(initialStatus);
+        setPendingTests(dashboardData.pending_tests || []);
       } catch (err) {
-        console.error("Error fetching samples:", err);
-        setError("Failed to load sample data. Please refresh.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please refresh or contact support.");
       }
     };
 
-    fetchIngredients();
-    fetchSamples();
+    fetchIngredientsAndDashboard();
   }, [token]);
 
   const handleSampleChange = (index, field, value) => {
-    const updatedSamples = [...samplesToAdd];
-    updatedSamples[index][field] = value;
-    setSamplesToAdd(updatedSamples);
+    const updated = [...samplesToAdd];
+    updated[index][field] = value;
+    setSamplesToAdd(updated);
   };
 
   const handleSelectChange = (index, selectedOptions, category) => {
-    const updatedSamples = [...samplesToAdd];
+    const updated = [...samplesToAdd];
     const field = category === "microbiology" ? "selected_micro_ingredients" : "selected_chem_ingredients";
-    const currentSelections = updatedSamples[index][field] || [];
-    const newSelections = selectedOptions ? selectedOptions.map(option => option.value) : [];
-    const updatedSelections = [...new Set([...currentSelections, ...newSelections])];
-    updatedSamples[index][field] = updatedSelections;
-    setSamplesToAdd(updatedSamples);
+    updated[index][field] = selectedOptions ? selectedOptions.map((o) => o.value) : [];
+    setSamplesToAdd(updated);
   };
 
   const addNewSample = () => {
-    setSamplesToAdd([...samplesToAdd, { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
+    setSamplesToAdd((prev) => [
+      ...prev,
+      { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
+    ]);
   };
 
   const calculateTotalPrice = () => {
@@ -106,8 +131,8 @@ export default function RegistrarDashboard() {
     samplesToAdd.forEach((sample) => {
       const allSelected = [...sample.selected_micro_ingredients, ...sample.selected_chem_ingredients];
       allSelected.forEach((id) => {
-        const ingredient = ingredients.find((ing) => ing.id === id);
-        if (ingredient) testsPrice += parseFloat(ingredient.price || 0);
+        const ing = ingredients.find((x) => x.id === id);
+        if (ing) testsPrice += parseFloat(ing.price || 0);
       });
     });
     return (testsPrice + MARKING_FEE * samplesToAdd.length).toFixed(2);
@@ -132,10 +157,10 @@ export default function RegistrarDashboard() {
         email: customerEmail,
         address: customerAddress,
       },
-      samples: samplesToAdd.map((sample) => ({
-        sample_name: sample.sample_name,
-        sample_details: sample.sample_details,
-        selected_ingredients: [...sample.selected_micro_ingredients, ...sample.selected_chem_ingredients],
+      samples: samplesToAdd.map((s) => ({
+        sample_name: s.sample_name,
+        sample_details: s.sample_details,
+        selected_ingredients: [...s.selected_micro_ingredients, ...s.selected_chem_ingredients],
       })),
     };
 
@@ -148,13 +173,13 @@ export default function RegistrarDashboard() {
 
       if (!response.ok) {
         let errorMessage = `Submission failed: ${response.status}`;
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {}
         if (errorData) {
           const errorMessages = Object.entries(errorData)
-            .map(
-              ([field, messages]) =>
-                `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`
-            )
+            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
             .join("\n");
           errorMessage = `Validation errors:\n${errorMessages}`;
         }
@@ -164,15 +189,20 @@ export default function RegistrarDashboard() {
       const data = await response.json();
       const totalPayment = calculateTotalPrice();
       alert(
-        `Samples submitted successfully!\nControl Number(s): ${data.samples.map(s => s.control_number).join(", ")}\nTotal Amount Due: TZS ${totalPayment}`
+        `Samples submitted successfully!\nControl Number(s): ${data.samples
+          .map((s) => s.control_number)
+          .join(", ")}\nTotal Amount Due: TZS ${totalPayment}`
       );
 
-      setControlNumber(data.samples.map(s => s.control_number).join(", "));
+      setControlNumber(data.samples.map((s) => s.control_number).join(", "));
       setCustomerName("");
       setCustomerPhone("");
       setCustomerEmail("");
       setCustomerAddress("");
-      setSamplesToAdd([{ sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
+      setSamplesToAdd([
+        { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
+      ]);
+
       const newStatus = {};
       data.samples.forEach((s) => {
         newStatus[s.control_number] = "Pending";
@@ -199,8 +229,9 @@ export default function RegistrarDashboard() {
     }
     setLoading(true);
     try {
+      const firstCtrl = controlNumber.split(",")[0].trim();
       const response = await fetch(
-        `http://192.168.1.180:8000/api/payments/verify/${controlNumber.split(",")[0]}/`,
+        `http://192.168.1.180:8000/api/payments/verify/${firstCtrl}/`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -210,13 +241,15 @@ export default function RegistrarDashboard() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setPaymentStatus((prev) => ({ ...prev, [controlNumber.split(",")[0]]: data.payment.status }));
+          setPaymentStatus((prev) => ({ ...prev, [firstCtrl]: data.payment.status }));
           setPaymentDetails((prev) => ({
             ...prev,
-            [controlNumber.split(",")[0]]: {
+            [firstCtrl]: {
               status: data.payment.status,
               amount: data.payment.amount || "N/A",
-              date: data.payment.date || new Date().toLocaleString("en-US", { timeZone: "Africa/Nairobi" }),
+              date:
+                data.payment.date ||
+                new Date().toLocaleString("en-US", { timeZone: "Africa/Nairobi" }),
             },
           }));
         } else {
@@ -228,10 +261,11 @@ export default function RegistrarDashboard() {
       }
     } catch (err) {
       console.error("Payment check error:", err);
-      setPaymentStatus((prev) => ({ ...prev, [controlNumber.split(",")[0]]: "Pending" }));
+      const firstCtrl = controlNumber.split(",")[0].trim();
+      setPaymentStatus((prev) => ({ ...prev, [firstCtrl]: "Pending" }));
       setPaymentDetails((prev) => ({
         ...prev,
-        [controlNumber.split(",")[0]]: { status: "Pending", amount: "N/A", date: "N/A" },
+        [firstCtrl]: { status: "Pending", amount: "N/A", date: "N/A" },
       }));
       alert("Could not verify payment status. Defaulting to Pending.");
     } finally {
@@ -239,76 +273,31 @@ export default function RegistrarDashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-    navigate("/");
-  };
-
-  const microOptions = microIngredients.map(ingredient => ({
+  const microOptions = microIngredients.map((ingredient) => ({
     value: ingredient.id,
-    label: `${ingredient.name} (TZS ${ingredient.price})`
+    label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
 
-  const chemOptions = chemIngredients.map(ingredient => ({
+  const chemOptions = chemIngredients.map((ingredient) => ({
     value: ingredient.id,
-    label: `${ingredient.name} (TZS ${ingredient.price})`
+    label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
 
-  const handleControlClick = (controlNum, sampleName) => {
+  const handleControlClick = (controlNum, sName) => {
     setControlNumber(controlNum);
-    setSampleName(sampleName);
+    setSampleName(sName || "");
   };
 
   return (
-    <div className="dashboard-layout">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={logo} alt="Zafiri Logo" className="sidebar-logo" />
-        </div>
-        <ul className="menu">
-          <li
-            className={activeMenu === "dashboard" ? "active" : ""}
-            onClick={() => setActiveMenu("dashboard")}
-          >
-            <FaTachometerAlt className="menu-icon" /> Dashboard
-          </li>
-          <li
-            className={activeMenu === "register-sample" ? "active" : ""}
-            onClick={() => setActiveMenu("register-sample")}
-          >
-            <FaUserPlus className="menu-icon" /> Register Sample
-          </li>
-          <li
-            className={activeMenu === "verify-payment" ? "active" : ""}
-            onClick={() => setActiveMenu("verify-payment")}
-          >
-            <FaFlask className="menu-icon" /> Verify Payment
-          </li>
-          <li
-            className={activeMenu === "sample-history" ? "active" : ""}
-            onClick={() => setActiveMenu("sample-history")}
-          >
-            <FaHistory className="menu-icon" /> Sample History
-          </li>
-        </ul>
-      </aside>
-
-      <main className="content">
-        <header className="header">
-          <div className="header-left">
-            <h1>Welcome, {registrarName}</h1>
-            <p>Register and manage samples for Marine Lab operations</p>
-          </div>
-          <button className="logout-btn" onClick={handleLogout}>
-            <FaSignOutAlt className="btn-icon" /> Logout
-          </button>
-        </header>
+    <Layout menuItems={menuItems}>
+      <div className="dashboard-content">
+        {/* Optional welcome header inside content */}
+       
 
         {error && <div className="error-message">{error}</div>}
 
-        {activeMenu === "register-sample" && (
+        {/* Register Sample */}
+        {(activeTab === "register-sample" || activeTab === "dashboard") && (
           <section className="content-card register-sample-page">
             <h2 className="section-title">
               <FaUserPlus className="title-icon" /> Register New Sample(s)
@@ -318,7 +307,7 @@ export default function RegistrarDashboard() {
                 <h3>Customer Information</h3>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label htmlFor="customerName">Customer Name *</label>
+                    <label htmlFor="customerName">Customer Name </label>
                     <input
                       id="customerName"
                       type="text"
@@ -329,7 +318,7 @@ export default function RegistrarDashboard() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="customerPhone">Customer Phone *</label>
+                    <label htmlFor="customerPhone">Customer Phone </label>
                     <input
                       id="customerPhone"
                       type="tel"
@@ -340,7 +329,7 @@ export default function RegistrarDashboard() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="customerEmail">Customer Email *</label>
+                    <label htmlFor="customerEmail">Customer Email </label>
                     <input
                       id="customerEmail"
                       type="email"
@@ -351,7 +340,7 @@ export default function RegistrarDashboard() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="customerAddress">Customer Address *</label>
+                    <label htmlFor="customerAddress">Customer Address </label>
                     <textarea
                       id="customerAddress"
                       value={customerAddress}
@@ -395,16 +384,18 @@ export default function RegistrarDashboard() {
                         <Select
                           isMulti
                           options={microOptions}
-                          value={microOptions.filter(option => sample.selected_micro_ingredients.includes(option.value))}
+                          value={microOptions.filter((opt) =>
+                            sample.selected_micro_ingredients.includes(opt.value)
+                          )}
                           onChange={(selected) => handleSelectChange(index, selected, "microbiology")}
                           isDisabled={loading}
                           className="react-select-container"
                           classNamePrefix="react-select"
                           hideSelectedOptions={false}
-                          components={{ MultiValue: () => null }} // Hide multi-value tags
+                          components={{ MultiValue: () => null }}
                         />
                       ) : (
-                        <p>Loading tests...</p>
+                        <p>{error || "Loading tests..."}</p>
                       )}
                     </div>
                     <div className="form-group">
@@ -413,34 +404,34 @@ export default function RegistrarDashboard() {
                         <Select
                           isMulti
                           options={chemOptions}
-                          value={chemOptions.filter(option => sample.selected_chem_ingredients.includes(option.value))}
+                          value={chemOptions.filter((opt) =>
+                            sample.selected_chem_ingredients.includes(opt.value)
+                          )}
                           onChange={(selected) => handleSelectChange(index, selected, "chemistry")}
                           isDisabled={loading}
                           className="react-select-container"
                           classNamePrefix="react-select"
                           hideSelectedOptions={false}
-                          components={{ MultiValue: () => null }} // Hide multi-value tags
+                          components={{ MultiValue: () => null }}
                         />
                       ) : (
-                        <p>Loading tests...</p>
+                        <p>{error || "Loading tests..."}</p>
                       )}
                     </div>
+
                     <div className="selected-micro-tests">
                       <strong>Selected Microbiology Tests:</strong>
-                      {sample.selected_micro_ingredients.map(id => {
-                        const ingredient = ingredients.find(ing => ing.id === id);
-                        return ingredient ? (
-                          <div key={id}>- {ingredient.name} (TZS {ingredient.price})</div>
-                        ) : null;
+                      {sample.selected_micro_ingredients.map((id) => {
+                        const ing = ingredients.find((x) => x.id === id);
+                        return ing ? <div key={id}>- {ing.name} (TZS {ing.price})</div> : null;
                       })}
                     </div>
+
                     <div className="selected-chem-tests">
                       <strong>Selected Chemistry Tests:</strong>
-                      {sample.selected_chem_ingredients.map(id => {
-                        const ingredient = ingredients.find(ing => ing.id === id);
-                        return ingredient ? (
-                          <div key={id}>- {ingredient.name} (TZS {ingredient.price})</div>
-                        ) : null;
+                      {sample.selected_chem_ingredients.map((id) => {
+                        const ing = ingredients.find((x) => x.id === id);
+                        return ing ? <div key={id}>- {ing.name} (TZS {ing.price})</div> : null;
                       })}
                     </div>
                   </div>
@@ -468,79 +459,82 @@ export default function RegistrarDashboard() {
           </section>
         )}
 
-       {activeMenu === "verify-payment" && (
-  <section className="content-card verify-payment-page">
-    <h2 className="section-title">
-      <FaFlask className="title-icon" /> Verify Payment Status
-    </h2>
+        {/* Verify Payment */}
+        {activeTab === "verify-payment" && (
+          <section className="content-card verify-payment-page">
+            <h2 className="section-title">
+              <FaFlask className="title-icon" /> Verify Payment Status
+            </h2>
 
-    {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
-    <div className="table-wrapper">
-      <table className="payment-table">
-        <thead>
-          <tr>
-            <th>Customer Name</th>
-            <th>Sample Details</th>
-            <th>Ingredients</th>
-            <th>Control Number</th>
-            <th>Payment Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {samples.map((sample) => (
-            <tr key={sample.id}>
-              <td>{sample.customer.name}</td>
-              <td>{sample.sample_details}</td>
-              <td>
-                {sample.tests && sample.tests.length > 0
-                  ? sample.tests.map((test) => test.ingredient?.name || "N/A").join(", ")
-                  : "N/A"}
-              </td>
-              <td
-                style={{ cursor: "pointer", color: "#0077b6" }}
-                onClick={() => setControlNumber(sample.control_number)}
-              >
-                {sample.control_number}
-              </td>
-              <td>{paymentStatus[sample.control_number] || "Pending"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            <div className="table-wrapper">
+              <table className="payment-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Sample Details</th>
+                    <th>Ingredients</th>
+                    <th>Control Number</th>
+                    <th>Payment Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {samples.map((sample) => (
+                    <tr key={sample.id}>
+                      <td>{sample.customer?.name || "N/A"}</td>
+                      <td>{sample.sample_details || "N/A"}</td>
+                      <td>
+                        {sample.tests && sample.tests.length > 0
+                          ? sample.tests.map((t) => t.ingredient?.name || "N/A").join(", ")
+                          : pendingTests
+                              .filter((t) => t.sample === sample.id)
+                              .map((t) => t.ingredient?.name || "N/A")
+                              .join(", ") || "N/A"}
+                      </td>
+                      <td
+                        style={{ cursor: "pointer", color: "#0077b6" }}
+                        onClick={() => handleControlClick(sample.control_number, sample.name)}
+                      >
+                        {sample.control_number}
+                      </td>
+                      <td>{paymentStatus[sample.control_number] || "Pending"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-    <div className="form-group">
-      <input
-        type="text"
-        value={controlNumber}
-        onChange={(e) => setControlNumber(e.target.value)}
-        placeholder="Click a control number to populate"
-      />
-      <button
-        className="verify-btn"
-        onClick={checkPaymentStatus}
-        disabled={loading}
-      >
-        {loading ? "Checking..." : "Check Payment Status"}
-      </button>
-    </div>
+            <div className="form-group">
+              <input
+                type="text"
+                value={controlNumber}
+                onChange={(e) => setControlNumber(e.target.value)}
+                placeholder="Click a control number to populate"
+              />
+              <button className="verify-btn" onClick={checkPaymentStatus} disabled={loading}>
+                {loading ? "Checking..." : "Check Payment Status"}
+              </button>
+            </div>
 
-    {controlNumber && paymentStatus[controlNumber] && (
-      <div
-        className={`payment-status ${paymentStatus[controlNumber].toLowerCase()}`}
-      >
-        Payment Status: {paymentStatus[controlNumber]}
+            {controlNumber && paymentStatus[controlNumber] && (
+              <div className={`payment-status ${paymentStatus[controlNumber].toLowerCase()}`}>
+                Payment Status: {paymentStatus[controlNumber]}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Sample History (placeholder to keep structure identical) */}
+        {activeTab === "sample-history" && (
+          <section className="content-card">
+            <h2 className="section-title">
+              <FaHistory className="title-icon" /> Sample History
+            </h2>
+            <p>Coming soon…</p>
+          </section>
+        )}
       </div>
-    )}
-  </section>
-)}
-
-        
-      </main>
-      <footer className="footer">
-        <p>&copy; 2025 Marine Laboratory Management System. All rights reserved.</p>
-      </footer>
-    </div>
+    </Layout>
   );
 }

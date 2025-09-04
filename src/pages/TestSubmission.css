@@ -1,0 +1,209 @@
+/* src/styles/TestSubmission.css */
+.test-submission {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f4f7f9;
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1CA3DE;
+  margin: 0;
+}
+
+.back-btn {
+  background-color: #1CA3DE;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn:hover {
+  background-color: #0d8ccb;
+  transform: translateY(-2px);
+}
+
+.back-btn .btn-icon {
+  font-size: 1.2em;
+}
+
+.content {
+  flex: 1;
+  padding: 40px 60px;
+  background-color: #f4f7f9;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.submission-form {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.submission-form h2 {
+  font-size: 1.8em;
+  color: #1CA3DE;
+  margin-bottom: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.submission-form .section-icon {
+  font-size: 1.3em;
+}
+
+.submission-form .test-details {
+  margin-bottom: 20px;
+}
+
+.submission-form .test-details p {
+  margin: 10px 0;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.submission-form .test-details strong {
+  color: #1CA3DE;
+}
+
+.submission-form .form-group {
+  margin-bottom: 20px;
+}
+
+.submission-form label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.submission-form textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+}
+
+.submission-form textarea:focus {
+  border-color: #1CA3DE;
+  outline: none;
+}
+
+.submission-form .submit-btn {
+  background-color: #1CA3DE;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.submission-form .submit-btn:hover {
+  background-color: #0d8ccb;
+  transform: translateY(-2px);
+}
+
+.submission-form .submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submission-form .submit-btn .btn-icon {
+  font-size: 1.2em;
+}
+
+.submission-form .error {
+  color: #ff9800;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+}
+
+.submission-form .success {
+  color: #4caf50;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+  .test-submission {
+    height: auto;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.5em;
+  }
+
+  .back-btn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+
+  .submission-form {
+    padding: 15px;
+  }
+
+  .submission-form h2 {
+    font-size: 1.5em;
+  }
+
+  .submission-form .test-details p {
+    font-size: 1em;
+  }
+
+  .submission-form textarea {
+    font-size: 0.9em;
+  }
+
+  .submission-form .submit-btn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+}

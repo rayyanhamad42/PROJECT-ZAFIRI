@@ -7,7 +7,6 @@
     flex-direction: column;
 }
 
-/* Sidebar */
 .sidebar {
     background: #003366;
     color: #ffffff;
@@ -17,9 +16,14 @@
     display: flex;
     flex-direction: column;
     position: fixed;
-    height: 100%;
+    height: 100vh;
     top: 0;
     left: 0;
+}
+
+.sidebar-footer {
+  margin-top: auto; /* ✅ makes sure footer is always at bottom */
+  padding: 50px;
 }
 
 .sidebar-header {
@@ -55,7 +59,7 @@
     font-weight: 600;
 }
 
-/* Main Content */
+
 .content {
     flex: 1;
     padding: 40px 60px;
@@ -66,7 +70,7 @@
     overflow-y: auto;
 }
 
-/* Header */
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -110,8 +114,6 @@
 .logout-btn .btn-icon {
     font-size: 1.2em;
 }
-
-/* General Section Styles (Cards) */
 .content-card {
     background: #ffffff;
     padding: 30px;
@@ -139,7 +141,6 @@
     color: #0077b6;
 }
 
-/* Form Styles */
 .form-group {
     margin-bottom: 20px;
 }
@@ -168,7 +169,7 @@
     box-shadow: 0 0 6px rgba(0, 119, 182, 0.3);
 }
 
-/* react-select Styles */
+
 .react-select-container {
     width: 100%;
 }
@@ -224,7 +225,7 @@
     color: #ffffff;
 }
 
-/* Selected Tests Section */
+
 .selected-tests {
     margin-top: 15px;
     padding: 15px;
@@ -253,7 +254,7 @@
     color: #00b4d8;
 }
 
-/* Form Actions */
+
 .form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -290,7 +291,7 @@
     font-size: 1.1rem;
 }
 
-/* Payment Verification Styles */
+
 .verify-payment-page {
     display: flex;
     flex-direction: column;
@@ -391,7 +392,7 @@
     font-weight: bold;
 }
 
-/* Footer */
+
 .footer {
     text-align: center;
     color: #999;
@@ -401,7 +402,7 @@
     margin-top: auto;
 }
 
-/* Register Sample Page Specific Styles */
+
 .register-sample-page {
     display: flex;
     flex-direction: column;
@@ -444,7 +445,7 @@
     gap: 30px;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .dashboard-layout {
         flex-direction: column;
@@ -462,7 +463,10 @@
         justify-content: space-around;
         align-items: center;
     }
-
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid #334155;
+} 
     .sidebar-logo {
         display: none;
     }
