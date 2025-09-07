@@ -26,10 +26,10 @@ const HeadOfDepartmentDashboard = () => {
     {
       id: 103,
       sample_details: "Blood Sample C",
-      tests: [{ category: "Chemistry", ingredient: { name: "Cholesterol" } }],
+      tests: [],
       control_number: "CTRL-003",
-      status: "In Progress",
-      assigned_date: "2025-09-03T09:00:00Z",
+      status: "Pending",
+      assigned_date: null,
       assigned_to_technician: []
     }
   ]);
@@ -45,16 +45,18 @@ const HeadOfDepartmentDashboard = () => {
   const [modalError, setModalError] = useState("");
   const [modalSuccess, setModalSuccess] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // New state for dropdown visibility
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   const handleAssignTechnician = (sampleId) => {
     setSelectedSampleId(sampleId);
-    setSelectedCategory(""); // Reset category when opening modal
+    setSelectedCategory("");
     setShowModal(true);
     setModalError("");
     setModalSuccess("");
+    setIsDropdownOpen(false); // Ensure dropdown is closed when modal opens
   };
 
   const handleModalSubmit = (e) => {
@@ -74,15 +76,22 @@ const HeadOfDepartmentDashboard = () => {
     setPendingSamples(prev =>
       prev.map(sample => {
         if (sample.id === selectedSampleId) {
-          const existingIds = sample.assigned_to_technician.map(t => t.id);
-          const newTechnicians = technicianIds
-            .filter(id => !existingIds.includes(id))
-            .map(id => ({ id, username: technicians.find(t => t.id === id).username, category: selectedCategory }));
+          const existing = sample.assigned_to_technician;
+          const newAssignments = technicianIds
+            .filter(id => !existing.some(t => t.id === id && t.category === selectedCategory))
+            .map(id => ({
+              id,
+              username: technicians.find(t => t.id === id).username,
+              category: selectedCategory
+            }));
 
           return {
             ...sample,
-            tests: [...sample.tests, { category: selectedCategory, ingredient: { name: sample.tests[0]?.ingredient?.name || "TBD" } }],
-            assigned_to_technician: [...sample.assigned_to_technician, ...newTechnicians],
+            tests: [
+              ...sample.tests,
+              { category: selectedCategory, ingredient: { name: "TBD" } }
+            ],
+            assigned_to_technician: [...existing, ...newAssignments],
             status: "In Progress",
             assigned_date: new Date().toISOString(),
           };
@@ -107,10 +116,17 @@ const HeadOfDepartmentDashboard = () => {
     setSelectedCategory("");
     setModalError("");
     setModalSuccess("");
+    setIsDropdownOpen(false);
   };
 
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setIsDropdownOpen(false); // Close dropdown after selection
+  };
+
+  const toggleDropdown = (e) => {
+    e.preventDefault();
+    setIsDropdownOpen(prev => !prev);
   };
 
   const formatDate = (iso) => {
@@ -123,7 +139,7 @@ const HeadOfDepartmentDashboard = () => {
     const q = search.trim().toLowerCase();
     const matchSearch = q
       ? s.sample_details.toLowerCase().includes(q) ||
-        s.tests[0]?.ingredient?.name.toLowerCase().includes(q) ||
+        s.tests.some(t => t.ingredient?.name.toLowerCase().includes(q)) ||
         s.assigned_to_technician.some(t => t.username.toLowerCase().includes(q))
       : true;
     const matchStatus = statusFilter === "All" ? true : s.status.toLowerCase() === statusFilter.toLowerCase();
@@ -161,7 +177,7 @@ const HeadOfDepartmentDashboard = () => {
               <th>ID</th>
               <th>Technicians</th>
               <th>Sample</th>
-              <th>Test</th>
+              <th>Tests</th>
               <th>Control No.</th>
               <th>Assigned Date</th>
               <th>Status</th>
@@ -175,14 +191,22 @@ const HeadOfDepartmentDashboard = () => {
                 <td>
                   {s.assigned_to_technician.length > 0 ? (
                     s.assigned_to_technician.map(t => (
-                      <span key={t.id} className="tech-badge">{t.username} ({t.category})</span>
+                      <span key={`${t.id}-${t.category}`} className="tech-badge">
+                        {t.username} ({t.category})
+                      </span>
                     ))
                   ) : (
                     "—"
                   )}
                 </td>
                 <td>{s.sample_details}</td>
-                <td>{s.tests[0]?.ingredient?.name || "N/A"}</td>
+                <td>
+                  {s.tests.length > 0
+                    ? s.tests.map((t, i) => (
+                        <span key={i}>{t.ingredient?.name} ({t.category}) </span>
+                      ))
+                    : "N/A"}
+                </td>
                 <td>{s.control_number}</td>
                 <td>{formatDate(s.assigned_date)}</td>
                 <td>{s.status}</td>
@@ -211,11 +235,17 @@ const HeadOfDepartmentDashboard = () => {
 
                 <div className="form-group">
                   <label htmlFor="category">Select Test Category</label>
-                  <select id="category" name="category" value={selectedCategory} onChange={handleCategoryChange} required>
-                    <option value="">Select Category</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Microbiology">Microbiology</option>
-                  </select>
+                  <div className="custom-dropdown">
+                    <button className="dropdown-toggle" onClick={toggleDropdown}>
+                      {selectedCategory || "Select Category"} <span className="dropdown-arrow"></span>
+                    </button>
+                    {isDropdownOpen && ( // Conditionally render the dropdown menu
+                      <div className="dropdown-menu">
+                        <div className="dropdown-item" onClick={() => handleCategorySelect("Chemistry")}>Chemistry</div>
+                        <div className="dropdown-item" onClick={() => handleCategorySelect("Microbiology")}>Microbiology</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {modalError && <p className="error-text">{modalError}</p>}

@@ -127,10 +127,9 @@ button:disabled {
   padding: 6px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
-  font-size: 0.9em; /* Improved font size for better readability */
-  color: #333; /* Darker text color for better contrast */
+  font-size: 0.9em;
+  color: #333;
   background-color: #fff;
-  /* Specific styling for the listbox dropdown */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -141,11 +140,11 @@ button:disabled {
 .modal select option {
   padding: 6px 10px;
   background-color: #fff;
-  color: #333; /* Ensure option text is dark */
+  color: #333;
 }
 
 .modal select option:checked {
-  background-color: #1ca3de; /* Highlight selected options */
+  background-color: #1ca3de;
   color: #fff;
 }
 
@@ -173,30 +172,14 @@ button:disabled {
   margin-top: 5px;
 }
 
-/* Status badge (optional for table) */
-.status-badge {
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.75em;
-  color: #fff;
-}
-
-.status-badge.in-progress {
-  background-color: #ff9800;
-}
-
-.status-badge.completed {
-  background-color: #4caf50;
-}
-
-/* Specific styling for the Cancel button */
 .modal-actions button[type="button"] {
-  background-color: #f44336; /* Red color for cancel */
+  background-color: #f44336;
 }
 
 .modal-actions button[type="button"]:hover {
-  background-color: #d32f2f; /* Darker red on hover */
+  background-color: #d32f2f;
 }
+
 /* Technician badges */
 .tech-badge {
   display: inline-block;
@@ -209,16 +192,15 @@ button:disabled {
   font-weight: 500;
 }
 
-
+/* Fixed Dropdown Styling */
 .custom-dropdown {
   position: relative;
   width: 100%;
-  margin-top: 5px;
 }
 
 .dropdown-toggle {
   width: 100%;
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
   background-color: #fff;
@@ -227,34 +209,45 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.9em;
+  color: #333;
 }
 
 .dropdown-arrow {
-  border: solid #000;
+  border: solid #555;
   border-width: 0 2px 2px 0;
   display: inline-block;
   padding: 3px;
   transform: rotate(45deg);
-  margin-left: 5px;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Rotate arrow when dropdown is open */
+.dropdown-menu.active + .dropdown-arrow {
+  transform: rotate(-135deg);
 }
 
 .dropdown-menu {
-  display: none;
   position: absolute;
+  top: 100%;
+  left: 0;
   width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
   background-color: #fff;
-  z-index: 1000;
-}
-
-.dropdown-menu.active {
-  display: block;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: block; /* The JS logic will handle showing/hiding this */
 }
 
 .dropdown-item {
-  padding: 10px;
+  padding: 10px 12px;
   cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
 }
 
 .dropdown-item:hover {
