@@ -8,25 +8,25 @@ const HeadOfDepartmentDashboard = () => {
     {
       id: 101,
       sample_details: "Blood Sample A",
-      tests: [{ ingredient: { name: "Hemoglobin" } }],
+      tests: [{ category: "Chemistry", ingredient: { name: "Hemoglobin" } }],
       control_number: "CTRL-001",
       status: "In Progress",
       assigned_date: "2025-09-01T10:30:00Z",
-      assigned_to_technician: [{ id: 1, username: "tech1" }]
+      assigned_to_technician: [{ id: 1, username: "tech1", category: "Chemistry" }]
     },
     {
       id: 102,
       sample_details: "Urine Sample B",
-      tests: [{ ingredient: { name: "Glucose" } }],
+      tests: [{ category: "Microbiology", ingredient: { name: "Glucose" } }],
       control_number: "CTRL-002",
       status: "Completed",
       assigned_date: "2025-09-02T12:00:00Z",
-      assigned_to_technician: [{ id: 2, username: "tech2" }]
+      assigned_to_technician: [{ id: 2, username: "tech2", category: "Microbiology" }]
     },
     {
       id: 103,
       sample_details: "Blood Sample C",
-      tests: [{ ingredient: { name: "Cholesterol" } }],
+      tests: [{ category: "Chemistry", ingredient: { name: "Cholesterol" } }],
       control_number: "CTRL-003",
       status: "In Progress",
       assigned_date: "2025-09-03T09:00:00Z",
@@ -44,12 +44,14 @@ const HeadOfDepartmentDashboard = () => {
   const [selectedSampleId, setSelectedSampleId] = useState(null);
   const [modalError, setModalError] = useState("");
   const [modalSuccess, setModalSuccess] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   const handleAssignTechnician = (sampleId) => {
     setSelectedSampleId(sampleId);
+    setSelectedCategory(""); // Reset category when opening modal
     setShowModal(true);
     setModalError("");
     setModalSuccess("");
@@ -64,6 +66,10 @@ const HeadOfDepartmentDashboard = () => {
       setModalError("Please select at least one technician.");
       return;
     }
+    if (!selectedCategory) {
+      setModalError("Please select a test category.");
+      return;
+    }
 
     setPendingSamples(prev =>
       prev.map(sample => {
@@ -71,10 +77,11 @@ const HeadOfDepartmentDashboard = () => {
           const existingIds = sample.assigned_to_technician.map(t => t.id);
           const newTechnicians = technicianIds
             .filter(id => !existingIds.includes(id))
-            .map(id => technicians.find(t => t.id === id));
+            .map(id => ({ id, username: technicians.find(t => t.id === id).username, category: selectedCategory }));
 
           return {
             ...sample,
+            tests: [...sample.tests, { category: selectedCategory, ingredient: { name: sample.tests[0]?.ingredient?.name || "TBD" } }],
             assigned_to_technician: [...sample.assigned_to_technician, ...newTechnicians],
             status: "In Progress",
             assigned_date: new Date().toISOString(),
@@ -88,6 +95,7 @@ const HeadOfDepartmentDashboard = () => {
     setTimeout(() => {
       setShowModal(false);
       setSelectedSampleId(null);
+      setSelectedCategory("");
       setModalError("");
       setModalSuccess("");
     }, 1000);
@@ -96,8 +104,13 @@ const HeadOfDepartmentDashboard = () => {
   const handleModalClose = () => {
     setShowModal(false);
     setSelectedSampleId(null);
+    setSelectedCategory("");
     setModalError("");
     setModalSuccess("");
+  };
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
   };
 
   const formatDate = (iso) => {
@@ -162,7 +175,7 @@ const HeadOfDepartmentDashboard = () => {
                 <td>
                   {s.assigned_to_technician.length > 0 ? (
                     s.assigned_to_technician.map(t => (
-                      <span key={t.id} className="tech-badge">{t.username}</span>
+                      <span key={t.id} className="tech-badge">{t.username} ({t.category})</span>
                     ))
                   ) : (
                     "—"
@@ -194,6 +207,15 @@ const HeadOfDepartmentDashboard = () => {
                     ))}
                   </select>
                   <small>Select one or more technicians (Ctrl/Command + Click)</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="category">Select Test Category</label>
+                  <select id="category" name="category" value={selectedCategory} onChange={handleCategoryChange} required>
+                    <option value="">Select Category</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Microbiology">Microbiology</option>
+                  </select>
                 </div>
 
                 {modalError && <p className="error-text">{modalError}</p>}
