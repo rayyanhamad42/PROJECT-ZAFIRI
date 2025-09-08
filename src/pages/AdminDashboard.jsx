@@ -47,7 +47,7 @@ const AdminDashboard = () => {
     { name: "Dashboard", icon: <FaTachometerAlt />, path: "/admin-dashboard" },
     { name: "Manage Users", icon: <FaUserCog />, path: "/manage-users" },
     { name: "Add Ingredients", icon: <FaPlusSquare />, path: "/add-ingredients" },
-    { name: "System Config", icon: <FaCogs />, path: "/system-config" },
+  
   ];
 
   useEffect(() => {

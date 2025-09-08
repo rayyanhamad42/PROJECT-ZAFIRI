@@ -241,8 +241,8 @@ const HeadOfDepartmentDashboard = () => {
                     </button>
                     {isDropdownOpen && ( // Conditionally render the dropdown menu
                       <div className="dropdown-menu">
-                        <div className="dropdown-item" onClick={() => handleCategorySelect("Chemistry")}>Chemistry</div>
-                        <div className="dropdown-item" onClick={() => handleCategorySelect("Microbiology")}>Microbiology</div>
+              <div className="dropdown-item-style" onClick={() => handleCategorySelect("Chemistry")}>Chemistry</div>
+              <div className="dropdown-item-style" onClick={() => handleCategorySelect("Microbiology")}>Microbiology</div>
                       </div>
                     )}
                   </div>

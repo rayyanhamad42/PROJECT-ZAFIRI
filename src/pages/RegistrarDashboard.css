@@ -22,7 +22,7 @@
 }
 
 .sidebar-footer {
-  margin-top: auto; /* ✅ makes sure footer is always at bottom */
+  margin-top: auto;
   padding: 50px;
 }
 
@@ -59,7 +59,6 @@
     font-weight: 600;
 }
 
-
 .content {
     flex: 1;
     padding: 40px 60px;
@@ -69,7 +68,6 @@
     flex-direction: column;
     overflow-y: auto;
 }
-
 
 .header {
     display: flex;
@@ -114,6 +112,7 @@
 .logout-btn .btn-icon {
     font-size: 1.2em;
 }
+
 .content-card {
     background: #ffffff;
     padding: 30px;
@@ -168,7 +167,6 @@
     border-color: #0077b6;
     box-shadow: 0 0 6px rgba(0, 119, 182, 0.3);
 }
-
 
 .react-select-container {
     width: 100%;
@@ -225,7 +223,6 @@
     color: #ffffff;
 }
 
-
 .selected-tests {
     margin-top: 15px;
     padding: 15px;
@@ -254,7 +251,6 @@
     color: #00b4d8;
 }
 
-
 .form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -281,6 +277,22 @@
     transform: translateY(-2px);
 }
 
+.generate-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.generate-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
 .control-display {
     background-color: #e1f5fe;
     color: #004d73;
@@ -290,7 +302,6 @@
     font-weight: 600;
     font-size: 1.1rem;
 }
-
 
 .verify-payment-page {
     display: flex;
@@ -350,11 +361,6 @@
     max-width: 300px;
 }
 
-.verify-btn {
-    padding: 12px 25px;
-    margin-top: 10px;
-}
-
 .verify-btn:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
@@ -392,7 +398,6 @@
     font-weight: bold;
 }
 
-
 .footer {
     text-align: center;
     color: #999;
@@ -401,7 +406,6 @@
     border-top: 1px solid #eee;
     margin-top: auto;
 }
-
 
 .register-sample-page {
     display: flex;
@@ -445,7 +449,6 @@
     gap: 30px;
 }
 
-
 @media (max-width: 768px) {
     .dashboard-layout {
         flex-direction: column;
@@ -463,10 +466,12 @@
         justify-content: space-around;
         align-items: center;
     }
-.sidebar-footer {
-    padding: 20px;
-    border-top: 1px solid #334155;
-} 
+
+    .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid #334155;
+    }
+
     .sidebar-logo {
         display: none;
     }

@@ -194,62 +194,67 @@ button:disabled {
 
 /* Fixed Dropdown Styling */
 .custom-dropdown {
-  position: relative;
-  width: 100%;
+position: relative;
+width: 100%;
 }
 
 .dropdown-toggle {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  cursor: pointer;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9em;
-  color: #333;
+width: 100%;
+padding: 8px 12px;
+border: 1px solid #ccc;
+border-radius: 4px;
+background-color: #fff;
+cursor: pointer;
+text-align: left;
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-size: 0.9em;
+color: #333;
+transition: all 0.2s ease-in-out;
 }
 
 .dropdown-arrow {
-  border: solid #555;
-  border-width: 0 2px 2px 0;
-  display: inline-block;
-  padding: 3px;
-  transform: rotate(45deg);
-  transition: transform 0.2s ease-in-out;
+border: solid #555;
+border-width: 0 2px 2px 0;
+display: inline-block;
+padding: 3px;
+transform: rotate(45deg);
+transition: transform 0.2s ease-in-out;
 }
 
 /* Rotate arrow when dropdown is open */
 .dropdown-menu.active + .dropdown-arrow {
-  transform: rotate(-135deg);
+transform: rotate(-135deg);
 }
 
 .dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  background-color: #fff;
-  z-index: 100;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  display: block; /* The JS logic will handle showing/hiding this */
+position: absolute;
+top: 100%;
+left: 0;
+width: 100%;
+max-height: 200px;
+overflow-y: auto;
+border: 1px solid #ccc;
+border-top: none;
+border-radius: 0 0 4px 4px;
+background-color: #fff;
+z-index: 100;
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+display: block;
 }
 
-.dropdown-item {
-  padding: 10px 12px;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.2s;
+.dropdown-item-style {
+padding: 10px 12px;
+cursor: pointer;
+font-size: 0.9em;
+transition: background-color 0.2s, color 0.2s;
+background-color: #fff; 
+color: #333; 
 }
 
-.dropdown-item:hover {
-  background-color: #f0f0f0;
+.dropdown-item-style:hover,
+.dropdown-item-style.selected {
+background-color: #d32f2f;
+color: #fff; 
 }

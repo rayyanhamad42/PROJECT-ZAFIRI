@@ -23,6 +23,7 @@ export default function RegistrarDashboard() {
   const [customerAddress, setCustomerAddress] = useState("");
   const [controlNumber, setControlNumber] = useState("");
   const [sampleName, setSampleName] = useState("");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const [paymentStatus, setPaymentStatus] = useState({});
   const [paymentDetails, setPaymentDetails] = useState({}); // kept for future use
@@ -50,16 +51,18 @@ export default function RegistrarDashboard() {
     { name: "Sample History", path: "/registrar-dashboard/sample-history", icon: <FaHistory /> },
   ];
 
-  // Determine active tab from URL
-  const pathname = location.pathname || "";
-  const activeTab =
-    pathname.endsWith("/verify-payment")
-      ? "verify-payment"
-      : pathname.endsWith("/sample-history")
-      ? "sample-history"
-      : pathname.endsWith("/registrar-dashboard")
-      ? "dashboard"
-      : "register-sample"; // default when path is /registrar-dashboard/register-sample or others
+  useEffect(() => {
+    const { pathname } = location;
+    if (pathname === "/registrar-dashboard/verify-payment") {
+      setActiveTab("verify-payment");
+    } else if (pathname === "/registrar-dashboard/sample-history") {
+      setActiveTab("sample-history");
+    } else if (pathname === "/registrar-dashboard/register-sample") {
+      setActiveTab("register-sample");
+    } else {
+      setActiveTab("dashboard");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchIngredientsAndDashboard = async () => {
