@@ -83,9 +83,10 @@ export default function LabTechnicianDashboard() {
               <table className="tasks-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Sample</th>
-                    <th>Customer</th>
+                    <th>Customer ID</th>
+            
+                    <th>Sample Code </th>
+                    <th>Sample Details</th>
                     <th>Test Type</th>
                     <th>Assigned Date</th>
                     <th>Assigned By</th>
