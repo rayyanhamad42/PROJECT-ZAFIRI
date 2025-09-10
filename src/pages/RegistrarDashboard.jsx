@@ -320,90 +320,145 @@ export default function RegistrarDashboard() {
             </form>
           </section>
         )}
+{/* Claim Submissions */}
+{activeTab === "claim-submissions" && (
+  <section className="content-card">
+    <h2 className="section-title">
+      <FaClipboardCheck /> Claim Submissions
+    </h2>
 
-        {/* Claim Submissions */}
-        {activeTab === "claim-submissions" && (
-          <section className="content-card">
-            <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
-
-            {unclaimedSamples.length === 0 ? (
-              <p>No unclaimed samples at the moment.</p>
-            ) : (
-              <table className="samples-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Sample Details</th>
-                    <th>Payment Due</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unclaimedSamples.map((sample) => (
-                    <tr key={sample.id}>
-                      <td>{sample.id}</td>
-                      <td>{sample.customer?.name}</td>
-                      <td>{sample.customer?.email}</td>
-                      <td>{sample.customer?.phone_number}</td>
-                      <td>{sample.sample_details}</td>
-                      <td>{sample.payment?.amount_due} TZS</td>
-                      <td>{sample.payment?.status}</td>
-                      <td>
-                        <button
-                          className="claim-btn"
-                          onClick={() => setModalSample(sample)}
-                        >
-                          Claim
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {/* Modal */}
-            {modalSample && (
-              <div className="modal-overlay" onClick={() => setModalSample(null)}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                  <h3>Claim Sample</h3>
-                  <p>
-                    Are you sure you want to claim sample <strong>{modalSample.sample_details}</strong> for customer <strong>{modalSample.customer?.name}</strong>?
-                  </p>
-                  <p><strong>Payment Due:</strong> {modalSample.payment?.amount_due} TZS</p>
-                  <div className="modal-actions">
-                    <button
-                      className="submit-btn"
-                      onClick={async () => {
-                        try {
-                          const response = await fetch(`http://192.168.1.180:8000/api/claim-sample/${modalSample.id}/`, {
-                            method: "POST",
-                            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-                          });
-                          if (!response.ok) throw new Error("Failed to claim sample.");
-                          alert("Sample claimed successfully!");
-                          setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== modalSample.id));
-                          setModalSample(null);
-                        } catch (err) {
-                          alert("Error claiming sample. Try again.");
-                        }
-                      }}
-                    >
-                      Confirm
-                    </button>
-                    <button className="add-sample-btn" onClick={() => setModalSample(null)}>
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
+    <table className="samples-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Middle Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Country</th>
+          <th>Region</th>
+          <th>Street</th>
+          <th>National ID</th>
+          <th>Organization</th>
+          <th>Sample Details</th>
+          <th>Payment Due</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {unclaimedSamples.length > 0 ? (
+          unclaimedSamples.map((sample) => (
+            <tr key={sample.id}>
+              <td>{sample.id}</td>
+              <td>{sample.customer?.first_name}</td>
+              <td>{sample.customer?.middle_name}</td>
+              <td>{sample.customer?.last_name}</td>
+              <td>{sample.customer?.email}</td>
+              <td>
+                {sample.customer?.phone_country_code}{" "}
+                {sample.customer?.phone_number}
+              </td>
+              <td>{sample.customer?.country}</td>
+              <td>{sample.customer?.region}</td>
+              <td>{sample.customer?.street}</td>
+              <td>{sample.customer?.national_id}</td>
+              <td>
+                {sample.customer?.is_organization
+                  ? `${sample.customer?.organization_name} (${sample.customer?.organization_id})`
+                  : "N/A"}
+              </td>
+              <td>{sample.sample_details}</td>
+              <td>{sample.payment?.amount_due} TZS</td>
+              <td
+                className={
+                  sample.payment?.status === "Pending"
+                    ? "status-pending"
+                    : "status-approved"
+                }
+              >
+                {sample.payment?.status}
+              </td>
+              <td>
+                <button
+                  className="claim-btn"
+                  onClick={() => setModalSample(sample)}
+                >
+                  Claim
+                </button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="15" style={{ textAlign: "center", padding: "10px" }}>
+              No unclaimed samples at the moment.
+            </td>
+          </tr>
         )}
+      </tbody>
+    </table>
+
+    {/* Modal */}
+    {modalSample && (
+      <div className="modal-overlay" onClick={() => setModalSample(null)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <h3>Claim Sample</h3>
+          <p>
+            Are you sure you want to claim{" "}
+            <strong>{modalSample.sample_details}</strong> for customer{" "}
+            <strong>
+              {modalSample.customer?.first_name}{" "}
+              {modalSample.customer?.last_name}
+            </strong>
+            ?
+          </p>
+          <p>
+            <strong>Payment Due:</strong>{" "}
+            {modalSample.payment?.amount_due} TZS
+          </p>
+          <div className="modal-actions">
+            <button
+              className="submit-btn"
+              onClick={async () => {
+                try {
+                  const response = await fetch(
+                    `http://192.168.1.180:8000/api/claim-sample/${modalSample.id}/`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  );
+                  if (!response.ok) throw new Error("Failed to claim sample.");
+                  alert("Sample claimed successfully!");
+                  setUnclaimedSamples(
+                    unclaimedSamples.filter((s) => s.id !== modalSample.id)
+                  );
+                  setModalSample(null);
+                } catch (err) {
+                  alert("Error claiming sample. Try again.");
+                }
+              }}
+            >
+              Confirm
+            </button>
+            <button
+              className="add-sample-btn"
+              onClick={() => setModalSample(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+)}
+
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (

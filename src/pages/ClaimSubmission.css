@@ -1,0 +1,158 @@
+/* Container */
+.claim-submission-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.claim-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1ca3de;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Table */
+.claim-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.claim-table th,
+.claim-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.claim-table th {
+  background-color: #1ca3de;
+  color: white;
+  font-weight: bold;
+}
+
+.claim-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.claim-table tr:hover {
+  background-color: #eef9ff;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background-color: #ffcc00; /* Yellow for pending */
+  color: #000;
+}
+
+.status-badge.approved {
+  background-color: #28a745; /* Green for approved */
+  color: #fff;
+}
+
+/* Action Buttons */
+.view-btn {
+  background-color: #1ca3de;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.view-btn:hover {
+  background-color: #148bbd;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+  z-index: 1000;
+}
+
+/* Modal Content */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 450px;
+  max-width: 95%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Slide Down Animation */
+.slide-down {
+  animation: slideDown 0.4s ease forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.approve-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.approve-btn:hover {
+  background-color: #218838;
+}
+
+.close-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: #b02a37;
+}

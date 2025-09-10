@@ -13,6 +13,7 @@ import ManageUsers from './pages/ManageUsers';
 import ErrorBoundary from './pages/ErrorBoundary';
 
 import RegistrarDashboard from './pages/RegistrarDashboard';
+import ClaimSubmission from './pages/ClaimSubmission';
 
 import AddIngredients from './pages/AddIngredients';
 
@@ -46,7 +47,8 @@ return (
 <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
 <Route path="/Registrar-dashboard" element={<RegistrarDashboard />} />
-<Route path="/Registrar-dashboard/register-sample" element={<RegistrarDashboard />} />  <Route path="/registrar-dashboard/claim-submissions" element={<RegistrarDashboard />} />
+<Route path="/Registrar-dashboard/register-sample" element={<RegistrarDashboard />} /> 
+ <Route path="/registrar-dashboard/claim-submissions" element={<RegistrarDashboard />} />
 <Route path="/Registrar-dashboard/verify-payment" element={<RegistrarDashboard />} />
 <Route path="/Registrar-dashboard/sample-history" element={<RegistrarDashboard />} />
 
