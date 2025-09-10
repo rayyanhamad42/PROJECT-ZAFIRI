@@ -11,6 +11,7 @@ export default function TestSubmission() {
   const [formData, setFormData] = useState({ result_data: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false); // <--- RE-ADDED: State variable for submission status
 
   // Sidebar menu items
   const menuItems = [
@@ -25,6 +26,10 @@ export default function TestSubmission() {
 
     if (foundTest) {
       setTest(foundTest);
+      // Check if the test was already completed or submitted
+      if (foundTest.status === "Completed") {
+        setIsSubmitted(true);
+      }
     } else {
       setError("Test not found.");
     }
@@ -44,9 +49,27 @@ export default function TestSubmission() {
       sample: test?.sample?.id,
       result_data: formData.result_data,
     });
+    
+    // --- Update local storage after a successful submission ---
+    const testsData = JSON.parse(localStorage.getItem("assignedTests")) || [];
+    const updatedTests = testsData.map(t => {
+      if (t.id === parseInt(testId, 10)) {
+        return { ...t, status: "Completed" };
+      }
+      return t;
+    });
+
+    localStorage.setItem("assignedTests", JSON.stringify(updatedTests));
+    // --- End Update local storage ---
+
     setSuccess("Result submitted successfully! (Mock submission)");
+    setIsSubmitted(true); // <--- Set submission state to true
     setFormData({ result_data: "" });
-    setTimeout(() => navigate("/technician-dashboard"), 2000);
+
+    // Navigate with a state to trigger a refresh on the dashboard
+    setTimeout(() => {
+      navigate("/technician-dashboard", { state: { refresh: true } });
+    }, 1000); // Wait 1 second before navigating
   };
 
   const handleBack = () => navigate("/technician-dashboard");
@@ -88,10 +111,15 @@ export default function TestSubmission() {
                     required
                     placeholder="Enter test results here (e.g., pH level: 7.2, Salinity: 35 ppt)"
                     rows="5"
+                    disabled={isSubmitted || test.status === "Completed"} // Disable textarea if submitted
                   />
                 </div>
-                <button type="submit" className="submit-btn" disabled={test.status === "Completed"}>
-                  <FaFileSignature className="btn-icon" /> Submit Result
+                <button
+                  type="submit"
+                  className={`submit-btn ${isSubmitted ? 'submitted' : ''}`} // Apply 'submitted' class
+                  disabled={isSubmitted || test.status === "Completed"} // Disable if submitted or already completed
+                >
+                  <FaFileSignature className="btn-icon" /> {isSubmitted ? "Submitted" : "Submit Result"}
                 </button>
               </form>
             )}

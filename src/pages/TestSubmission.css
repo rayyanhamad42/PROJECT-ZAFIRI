@@ -120,6 +120,11 @@
   outline: none;
 }
 
+.submission-form textarea:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
 .submission-form .submit-btn {
   background-color: #1CA3DE;
   color: white;
@@ -135,7 +140,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.submission-form .submit-btn:hover {
+.submission-form .submit-btn:hover:not(:disabled) { /* Apply hover only when not disabled */
   background-color: #0d8ccb;
   transform: translateY(-2px);
 }
@@ -145,6 +150,18 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* New style for submitted button */
+.submission-form .submit-btn.submitted {
+  background-color: #4caf50; /* Green color */
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submission-form .submit-btn.submitted:hover {
+  background-color: #4caf50; /* Keep green on hover when submitted */
+}
+
 
 .submission-form .submit-btn .btn-icon {
   font-size: 1.2em;
@@ -207,3 +224,4 @@
     font-size: 0.9em;
   }
 }
+

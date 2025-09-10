@@ -1,6 +1,7 @@
+// src/pages/LabTechnicianDashboard.js
 import React, { useEffect, useState } from "react";
-import { FaTachometerAlt, FaFileSignature, FaHistory, FaUser, FaEdit } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaTachometerAlt, FaHistory, FaUser, FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // Hakuna haja ya useLocation tena
 import Layout from "../components/Layout";
 
 export default function LabTechnicianDashboard() {
@@ -11,21 +12,27 @@ export default function LabTechnicianDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Mock fetch function
+  // Hii ndio sehemu ya muhimu: badilisha "fetchTests" kusoma kutoka localStorage
   const fetchTests = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = {
-        success: true,
-        tests: [
-          { id: 1, ingredient: { name: "Test A" }, status: "Pending", sample: { control_number: "C001", customer: { name: "John" }, date_received: "2025-09-01" }, assigned_by_hod: { name: "HOD1" } },
-          { id: 2, ingredient: { name: "Test B" }, status: "In Progress", sample: { control_number: "C002", customer: { name: "Jane" }, date_received: "2025-09-02" }, assigned_by_hod: { name: "HOD2" } },
-        ]
-      };
-      setAssignedTests(data.tests);
-      // Store in localStorage for TestSubmission page
-      localStorage.setItem("assignedTests", JSON.stringify(data.tests));
+      const storedTests = JSON.parse(localStorage.getItem("assignedTests"));
+
+      if (storedTests) {
+        setAssignedTests(storedTests);
+      } else {
+        // Hili linaweza kutokea mara ya kwanza mradi unapoendeshwa.
+        // Hifadhi data ya awali (mock data) kwenye localStorage
+        const mockData = {
+          tests: [
+            { id: 1, ingredient: { name: "Test A" }, status: "Pending", sample: { control_number: "C001", customer: { name: "Test" }, date_received: "2025-09-01" }, assigned_by_hod: { name: "HOD1" } },
+            { id: 2, ingredient: { name: "Test B" }, status: "In Progress", sample: { control_number: "C002", customer: { name: "Test" }, date_received: "2025-09-02" }, assigned_by_hod: { name: "HOD2" } },
+          ]
+        };
+        setAssignedTests(mockData.tests);
+        localStorage.setItem("assignedTests", JSON.stringify(mockData.tests));
+      }
     } catch (err) {
       setError("Failed to load assigned tests.");
     } finally {
@@ -37,7 +44,7 @@ export default function LabTechnicianDashboard() {
     const storedUsername = localStorage.getItem("username") || "TechnicianUser";
     setUsername(storedUsername);
     fetchTests();
-  }, []);
+  }, []); // [] ina maana hii itafanya kazi mara moja tu wakati ukurasa unafunguliwa
 
   useEffect(() => {
     setStats({
@@ -84,7 +91,6 @@ export default function LabTechnicianDashboard() {
                 <thead>
                   <tr>
                     <th>Customer ID</th>
-            
                     <th>Sample Code </th>
                     <th>Sample Details</th>
                     <th>Test Type</th>
@@ -106,11 +112,11 @@ export default function LabTechnicianDashboard() {
                       <td>{test.status}</td>
                       <td>
                         <button
-                          className="action-btn"
+                          className={`action-btn ${test.status === "Completed" ? "completed-btn" : ""}`}
                           disabled={test.status === "Completed"}
                           onClick={() => navigate(`/submit-result/${test.id}`)}
                         >
-                          <FaEdit /> Submit Result
+                          <FaEdit /> {test.status === "Completed" ? "Submitted" : "Submit Result"}
                         </button>
                       </td>
                     </tr>

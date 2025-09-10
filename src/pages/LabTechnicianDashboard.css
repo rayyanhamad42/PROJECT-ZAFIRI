@@ -339,3 +339,27 @@ body {
     max-height: 40vh;
   }
 }
+
+
+/* This rule applies to the completed button and overrides all other states. */
+.action-btn.completed-btn {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border: none !important;
+  cursor: not-allowed !important;
+  transition: none !important;
+  transform: none !important;
+  pointer-events: none !important; /* This is the key to preventing all mouse interaction */
+}
+
+/* It's good practice to also explicitly handle the hover and disabled states,
+   even though pointer-events: none should make them irrelevant. */
+.action-btn.completed-btn:hover {
+  background-color: #4CAF50 !important;
+  transform: none !important;
+}
+
+.action-btn.completed-btn:disabled {
+  background-color: #4CAF50 !important;
+  cursor: not-allowed !important;
+}

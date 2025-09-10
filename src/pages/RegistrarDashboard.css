@@ -1,547 +1,513 @@
-.dashboard-layout {
-    display: flex;
-    min-height: 100vh;
-    background-color: #f4f7f9;
-    color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    flex-direction: column;
+:root {
+  --primary-color: #1CA3DE;
+  --primary-dark: #0f86b8;
+  --primary-light: #e0f2ff;
+  --text-dark: #333;
+  --text-light: #555;
+  --background-white: #ffffff;
+  --background-grey: #f8f9fa;
+  --border-color: #ddd;
+  --success-color: #28a745;
+  --error-color: #dc3545;
+  --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --box-shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+  background-color: var(--background-grey);
+}
+
+/* --- Dashboard Layout --- */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background-grey);
+}
+
+.content {
+  flex-grow: 1;
+  padding: 40px 60px;
+  margin-left: 280px; /* Aligns with sidebar width */
+  background-color: var(--background-grey);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Sidebar --- */
 .sidebar {
-    background: #003366;
-    color: #ffffff;
-    padding: 20px;
-    width: 280px;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    height: 100vh;
-    top: 0;
-    left: 0;
+  background: var(--primary-color);
+  color: var(--background-white);
+  width: 280px;
+  position: fixed;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 20px;
+  text-align: center;
+}
+
+.sidebar-logo {
+  max-width: 200px;
+  height: auto;
+  transform-origin: center;
+}
+
+.sidebar .menu {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.sidebar .menu li {
+  padding: 15px 20px;
+  margin: 10px 0;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 1.1em;
+}
+
+.sidebar .menu li:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+.sidebar .menu .active {
+  background: var(--background-white);
+  color: var(--primary-color);
+  font-weight: 600;
+  box-shadow: var(--box-shadow-light);
 }
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 50px;
+  padding: 20px;
 }
 
-.sidebar-header {
-    text-align: center;
-    padding: 20px;
-}
-
-.sidebar-logo {
-    width: 200px;
-    transform-origin: center;
-}
-
-.sidebar .menu {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar .menu li {
-    padding: 15px 20px;
-    margin: 10px 0;
-    cursor: pointer;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-size: 1.1em;
-}
-
-.sidebar .menu .active {
-    background: #0077b6;
-    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
-    font-weight: 600;
-}
-
-.content {
-    flex: 1;
-    padding: 40px 60px;
-    background-color: #f4f7f9;
-    margin-left: 280px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
+/* --- Header --- */
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 20px 30px;
+  background-color: var(--background-white);
+  border-radius: 15px;
+  box-shadow: var(--box-shadow-light);
 }
 
 .header-left h1 {
-    color: #0077b6;
-    font-size: 2.5rem;
-    font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 .header-left p {
-    color: #555;
-    margin-top: 10px;
-    font-size: 1.1rem;
+  color: var(--text-light);
+  margin-top: 5px;
+  font-size: 1rem;
 }
 
 .logout-btn {
-    background-color: white;
-    color: #1CA3DE;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--error-color);
+  color: var(--background-white);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: var(--box-shadow-light);
 }
 
 .logout-btn:hover {
-    background-color: #c82333;
-    transform: translateY(-2px);
+  background-color: #c82333;
+  transform: translateY(-2px);
 }
 
-.logout-btn .btn-icon {
-    font-size: 1.2em;
-}
-
+/* --- Content Cards & Sections --- */
 .content-card {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    margin-bottom: 40px;
-    max-height: 70vh;
-    overflow-y: auto;
+  background: var(--background-white);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: var(--box-shadow-light);
+  margin-bottom: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .section-title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: #004d73;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 12px;
-    border-bottom: 3px solid #e0f2ff;
-    margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary-light);
+  margin-bottom: 25px;
 }
 
-.title-icon {
-    font-size: 1.6rem;
-    color: #0077b6;
+/* --- Forms --- */
+.form-section {
+  margin-bottom: 30px;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 25px;
+  background-color: var(--background-white);
+  box-shadow: var(--box-shadow-light);
 }
 
-.form-group {
-    margin-bottom: 20px;
+.form-section h3 {
+  color: var(--primary-dark);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
 }
 
 .form-group input,
 .form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 1rem;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-    outline: none;
-    border-color: #0077b6;
-    box-shadow: 0 0 6px rgba(0, 119, 182, 0.3);
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
 }
 
-.react-select-container {
-    width: 100%;
+.sample-box {
+  border: 2px solid var(--primary-light);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #fcfdff;
+  box-shadow: inset 0 0 8px rgba(28, 163, 222, 0.05);
 }
 
+.sample-box h4 {
+  color: var(--primary-dark);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* --- React-Select Overrides --- */
 .react-select__control {
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    min-height: 44px;
-    box-shadow: none;
-    background-color: #ffffff;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  min-height: 48px !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
 }
 
 .react-select__control--is-focused {
-    border-color: #0077b6;
-    box-shadow: 0 0 6px rgba(0, 119, 182, 0.3);
-}
-
-.react-select__menu {
-    z-index: 1000;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3) !important;
 }
 
 .react-select__option {
-    padding: 10px 15px;
-    cursor: pointer;
+  padding: 12px 20px;
 }
 
 .react-select__option--is-selected {
-    background-color: #0077b6;
-    color: #ffffff;
+  background-color: var(--primary-color) !important;
 }
 
-.react-select__multi-value {
-    background-color: #e9ecef;
-    border-radius: 4px;
-    margin: 2px;
+.react-select__option--is-focused {
+  background-color: var(--primary-light) !important;
+  color: var(--text-dark) !important;
 }
 
-.react-select__multi-value__label {
-    color: #333;
-    padding: 2px 6px;
-}
-
-.react-select__multi-value__remove {
-    cursor: pointer;
-    padding: 2px;
-    color: #dc3545;
-}
-
-.react-select__multi-value__remove:hover {
-    background-color: #dc3545;
-    color: #ffffff;
-}
-
-.selected-tests {
-    margin-top: 15px;
-    padding: 15px;
-    background-color: #1a1a1a;
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 1rem;
-}
-
-.selected-tests strong {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.selected-tests div {
-    margin: 5px 0;
-    padding-left: 15px;
-    position: relative;
-}
-
-.selected-tests div::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: #00b4d8;
-}
-
-.form-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
-}
-
+/* --- Buttons & Price Display --- */
 .submit-btn,
-.verify-btn {
-    background-color: #0077b6;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: background-color 0.3s, transform 0.2s;
+.add-sample-btn,
+.claim-btn {
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .submit-btn:hover,
-.verify-btn:hover {
-    background-color: #005f88;
-    transform: translateY(-2px);
+.add-sample-btn:hover,
+.claim-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(28, 163, 222, 0.2);
 }
 
-.generate-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: background-color 0.3s, transform 0.2s;
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.generate-btn:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
+.add-sample-btn {
+  background-color: #6c757d;
 }
 
-.control-display {
-    background-color: #e1f5fe;
-    color: #004d73;
-    padding: 15px 20px;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.1rem;
+.add-sample-btn:hover {
+  background-color: #5a6268;
 }
 
-.verify-payment-page {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+.total-price-display {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 15px 25px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 25px;
+  text-align: right;
+  border: 1px solid var(--primary-color);
 }
 
-.table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 20px;
+/* --- Tables --- */
+.samples-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--background-white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-light);
 }
 
-.payment-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.samples-table th,
+.samples-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.payment-table th,
-.payment-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #e0e0e0;
+.samples-table th {
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.payment-table th {
-    background-color: #0077b6;
-    color: #ffffff;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.samples-table tr:hover {
+  background-color: #f0f8ff;
 }
 
-.payment-table td {
-    color: #333;
+.samples-table td:last-child {
+  text-align: center;
 }
 
-.payment-table tr:hover {
-    background-color: #f5f5f5;
+.claim-btn {
+  background-color: var(--success-color);
+  font-size: 0.9em;
+  padding: 8px 15px;
 }
 
-.payment-table td:nth-child(4) {
-    color: #0077b6;
-    cursor: pointer;
-    text-decoration: underline;
+.claim-btn:hover {
+  background-color: #218838;
 }
 
-.payment-table td:nth-child(4):hover {
-    color: #005f88;
-}
-
-.form-group input[type="text"] {
-    margin-right: 10px;
-    max-width: 300px;
-}
-
-.verify-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-.payment-status {
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.payment-status.verified {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.payment-status.pending {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-}
-
+/* --- Other Components --- */
 .error-message {
-    background-color: #ffe1e1;
-    color: #dc3545;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-    white-space: pre-line;
-    font-weight: bold;
+  background-color: #f8d7da;
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
 }
 
-.footer {
-    text-align: center;
-    color: #999;
-    padding: 20px;
-    background-color: #fff;
-    border-top: 1px solid #eee;
-    margin-top: auto;
+
+.sample-inputs-group {
+  display: flex; /* Use flexbox for horizontal layout */
+  gap: 15px; /* Space between input and textarea */
+  margin-bottom: 20px; /* Space below this group */
 }
 
-.register-sample-page {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+.sample-inputs-group input,
+.sample-inputs-group textarea {
+  flex: 1; /* Each item takes equal space */
+  margin-bottom: 0; /* Remove default bottom margin if any */
 }
 
-.form-section {
-    background-color: #f9fbfd;
-    padding: 30px;
-    border-radius: 12px;
-    border: 1px solid #e0f2ff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
+.sample-inputs-group textarea {
+  min-height: 50px; /* Ensure textarea has a decent initial height */
+  resize: vertical; /* Allow vertical resizing only */
 }
 
-.form-section h3 {
-    font-size: 1.6rem;
-    color: #0077b6;
-    margin-bottom: 25px;
-    position: relative;
-    padding-left: 20px;
-    font-weight: 600;
+/* You might want to adjust the existing .sample-box styles as well, for better spacing */
+.sample-box > .react-select-container { /* Target the Select components directly */
+  margin-bottom: 15px; /* Add space below each select */
 }
 
-.form-section h3::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    background-color: #00b4d8;
-    border-radius: 50%;
+/* Adjust general input/textarea styling if needed for consistency */
+.form-group input,
+.form-group textarea,
+.sample-box input, /* Include these for general styling within sample-box */
+.sample-box textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+.sample-box input:focus,
+.sample-box textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
+}
+
+/* Updated button styling for "Add Another Sample" */
+.add-sample-btn {
+  background-color: #6c757d; /* A more subdued color for secondary action */
+  color: var(--background-white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px; /* Space above the button */
+}
+
+.add-sample-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Add these new rules to your CSS file */
+
+/* Grid for form inputs */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; /* Space between grid items */
 }
 
-@media (max-width: 768px) {
-    .dashboard-layout {
-        flex-direction: column;
-    }
+/* Update the .phone-input rule with this new CSS rule */
+.phone-country-select {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
 
-    .sidebar {
-        width: 100%;
-        height: auto;
-        padding: 10px 0;
-        box-shadow: none;
-        position: fixed;
-        bottom: 0;
-        z-index: 1000;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-    }
+.phone-country-select select {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-white);
+  font-size: 1rem;
+  -webkit-appearance: none; /* Removes default dropdown arrow in Webkit browsers */
+  -moz-appearance: none; /* Removes default dropdown arrow in Firefox */
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c757d' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  flex: 0 0 160px; /* Fixed width for the select dropdown */
+}
 
-    .sidebar-footer {
-        padding: 20px;
-        border-top: 1px solid #334155;
-    }
+.phone-country-select select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
+}
 
-    .sidebar-logo {
-        display: none;
-    }
+.phone-country-select .phone-number {
+  flex-grow: 1; /* Makes the number input fill the remaining space */
+}
 
-    .sidebar .menu {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-around;
-    }
+/* Ensure consistent styling for form-groups */
+.form-group {
+    margin-bottom: 20px;
+}
+/* Checkbox styling */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and checkbox */
+}
 
-    .sidebar .menu li {
-        margin: 0;
-        padding: 10px;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 5px;
-    }
+.checkbox-group input[type="checkbox"] {
+    width: auto; /* Override default width for checkboxes */
+    height: 20px;
+}
 
-    .sidebar .menu li span {
-        font-size: 0.8em;
-    }
+/* ⚠️ IMPORTANT: Update the sample-inputs-group to use form-group classes */
+.sample-inputs-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
 
-    .sidebar .menu .active {
-        box-shadow: none;
-        border-radius: 5px;
-    }
+.sample-inputs-group .form-group {
+    flex: 1; /* Makes each form-group take equal space */
+    margin-bottom: 0; /* Remove default margin from the form-group inside the flex container */
+}
 
-    .logout-btn {
-        display: none;
-    }
+.sample-inputs-group .form-group textarea {
+  min-height: 50px;
+  resize: vertical;
+}
 
-    .content {
-        padding: 20px;
-        margin-left: 0;
-        margin-bottom: 60px;
-    }
-
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        margin-bottom: 20px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .submit-btn,
-    .verify-btn,
-    .control-display {
-        width: 100%;
-        min-width: auto;
-    }
-
-    .table-wrapper {
-        overflow-x: auto;
-    }
-
-    .payment-table {
-        min-width: 600px;
-    }
-
-    .footer {
-        display: none;
-    }
+/* Add labels to select elements for better accessibility and style */
+.sample-box label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
 }

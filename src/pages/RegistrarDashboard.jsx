@@ -7,6 +7,7 @@ import {
   FaUserPlus,
   FaHistory,
   FaPlusCircle,
+  FaClipboardCheck,
 } from "react-icons/fa";
 import Select from "react-select";
 import Layout from "../components/Layout";
@@ -17,96 +18,92 @@ export default function RegistrarDashboard() {
   const location = useLocation();
 
   const [registrarName] = useState(localStorage.getItem("username") || "Registrar");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerAddress, setCustomerAddress] = useState("");
-  const [controlNumber, setControlNumber] = useState("");
-  const [sampleName, setSampleName] = useState("");
+
+  // 🟢 UPDATED: Added new customer fields
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+255");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [region, setRegion] = useState("");
+  const [street, setStreet] = useState("");
+  const [isOrganization, setIsOrganization] = useState(false);
+  const [nationalId, setNationalId] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
+  const [organizationId, setOrganizationId] = useState("");
+  
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const [paymentStatus, setPaymentStatus] = useState({});
-  const [paymentDetails, setPaymentDetails] = useState({}); // kept for future use
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [token] = useState(localStorage.getItem("access_token"));
+
+     const countryOptions = [
+    { name: "TZ", code: "+255", flag: "🇹🇿" },
+    { name: "KE", code: "+254", flag: "🇰🇪" },
+  ];
+  const [selectedCountry, setSelectedCountry] = useState(countryOptions[0]); // Default to Tanzania
+
   const [ingredients, setIngredients] = useState([]);
   const [microIngredients, setMicroIngredients] = useState([]);
   const [chemIngredients, setChemIngredients] = useState([]);
-  const [samples, setSamples] = useState([]);
-  const [pendingTests, setPendingTests] = useState([]);
-
-  const MARKING_FEE = 10000.0;
-
   const [samplesToAdd, setSamplesToAdd] = useState([
     { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
   ]);
 
-  // Menu for Layout (same style as other dashboards)
+  // Claim feature
+  const [unclaimedSamples, setUnclaimedSamples] = useState([]);
+
+  const MARKING_FEE = 10000.0;
+
   const menuItems = [
     { name: "Dashboard", path: "/registrar-dashboard", icon: <FaTachometerAlt /> },
     { name: "Register Sample", path: "/registrar-dashboard/register-sample", icon: <FaUserPlus /> },
+    { name: "Claim Submissions", path: "/registrar-dashboard/claim-submissions", icon: <FaClipboardCheck /> },
     { name: "Verify Payment", path: "/registrar-dashboard/verify-payment", icon: <FaFlask /> },
     { name: "Sample History", path: "/registrar-dashboard/sample-history", icon: <FaHistory /> },
   ];
 
   useEffect(() => {
     const { pathname } = location;
-    if (pathname === "/registrar-dashboard/verify-payment") {
-      setActiveTab("verify-payment");
-    } else if (pathname === "/registrar-dashboard/sample-history") {
-      setActiveTab("sample-history");
-    } else if (pathname === "/registrar-dashboard/register-sample") {
-      setActiveTab("register-sample");
-    } else {
-      setActiveTab("dashboard");
-    }
+    if (pathname.includes("verify-payment")) setActiveTab("verify-payment");
+    else if (pathname.includes("sample-history")) setActiveTab("sample-history");
+    else if (pathname.includes("register-sample")) setActiveTab("register-sample");
+    else if (pathname.includes("claim-submissions")) setActiveTab("claim-submissions");
+    else setActiveTab("dashboard");
   }, [location.pathname]);
 
   useEffect(() => {
-    const fetchIngredientsAndDashboard = async () => {
+    const fetchData = async () => {
       if (!token) return;
       try {
-        // Ingredients
-        const ingredientsResponse = await fetch("http://192.168.1.180:8000/api/ingredients/", {
+        // Load Ingredients
+        const ingRes = await fetch("http://192.168.1.180:8000/api/ingredients/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (ingredientsResponse.ok) {
-          const ingredientsData = await ingredientsResponse.json();
-          const allIngredients = ingredientsData.ingredients || [];
-          setIngredients(allIngredients);
-          setMicroIngredients(allIngredients.filter((ing) => ing.test_type === "Microbiology"));
-          setChemIngredients(allIngredients.filter((ing) => ing.test_type === "Chemistry"));
-        } else {
-          const errorText = await ingredientsResponse.text();
-          console.warn("Ingredients fetch failed:", ingredientsResponse.status, errorText);
-          setError("Cannot load test options. Please contact an Admin to set up ingredients.");
+        if (ingRes.ok) {
+          const ingData = await ingRes.json();
+          const all = ingData.ingredients || [];
+          setIngredients(all);
+          setMicroIngredients(all.filter((ing) => ing.test_type === "Microbiology"));
+          setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
         }
 
-        // Dashboard data
-        const dashboardResponse = await fetch("http://192.168.1.180:8000/api/dashboard/registrar/", {
+        // Load Unclaimed Submissions
+        const claimRes = await fetch("http://192.168.1.180:8000/api/unclaimed-samples/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!dashboardResponse.ok) throw new Error("Failed to fetch dashboard data.");
-
-        const dashboardData = await dashboardResponse.json();
-        const recent = dashboardData.recent_samples || [];
-        setSamples(recent);
-
-        const initialStatus = {};
-        recent.forEach((s) => {
-          initialStatus[s.control_number] = s.payment?.status || "Pending";
-        });
-        setPaymentStatus(initialStatus);
-        setPendingTests(dashboardData.pending_tests || []);
+        if (claimRes.ok) {
+          const claimData = await claimRes.json();
+          setUnclaimedSamples(claimData || []);
+        }
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load data. Please refresh or contact support.");
+        setError("Failed to load data.");
       }
     };
-
-    fetchIngredientsAndDashboard();
+    fetchData();
   }, [token]);
 
   const handleSampleChange = (index, field, value) => {
@@ -123,10 +120,7 @@ export default function RegistrarDashboard() {
   };
 
   const addNewSample = () => {
-    setSamplesToAdd((prev) => [
-      ...prev,
-      { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
-    ]);
+    setSamplesToAdd((prev) => [...prev, { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
   };
 
   const calculateTotalPrice = () => {
@@ -155,10 +149,19 @@ export default function RegistrarDashboard() {
 
     const requestBody = {
       customer: {
-        name: customerName,
-        phone_number: customerPhone,
-        email: customerEmail,
-        address: customerAddress,
+        first_name: firstName,
+        middle_name: middleName,
+        last_name: lastName,
+       phone_number: phoneNumber,
+        phone_country_code: selectedCountry.code,
+        email: email,
+        country: country,
+        region: region,
+        street: street,
+        is_organization: isOrganization,
+        national_id: nationalId,
+        organization_name: organizationName,
+        organization_id: organizationId,
       },
       samples: samplesToAdd.map((s) => ({
         sample_name: s.sample_name,
@@ -174,105 +177,46 @@ export default function RegistrarDashboard() {
         body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) {
-        let errorMessage = `Submission failed: ${response.status}`;
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {}
-        if (errorData) {
-          const errorMessages = Object.entries(errorData)
-            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
-            .join("\n");
-          errorMessage = `Validation errors:\n${errorMessages}`;
-        }
-        throw new Error(errorMessage);
-      }
+      if (!response.ok) throw new Error("Submission failed.");
 
-      const data = await response.json();
-      const totalPayment = calculateTotalPrice();
-      alert(
-        `Samples submitted successfully!\nControl Number(s): ${data.samples
-          .map((s) => s.control_number)
-          .join(", ")}\nTotal Amount Due: TZS ${totalPayment}`
-      );
+      alert("Samples submitted successfully! Registrar has registered the customer & sample.");
 
-      setControlNumber(data.samples.map((s) => s.control_number).join(", "));
-      setCustomerName("");
-      setCustomerPhone("");
-      setCustomerEmail("");
-      setCustomerAddress("");
-      setSamplesToAdd([
-        { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
-      ]);
+      // 🟢 Clear form fields after successful submission
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
+  
+      setPhoneNumber("");
+      setEmail("");
+      setCountry("");
+      setRegion("");
+      setStreet("");
+      setIsOrganization(false);
+      setNationalId("");
+      setOrganizationName("");
+      setOrganizationId("");
+       setSelectedCountry(countryOptions[0]); 
+      setSamplesToAdd([{ sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
 
-      const newStatus = {};
-      data.samples.forEach((s) => {
-        newStatus[s.control_number] = "Pending";
-      });
-      setPaymentStatus((prev) => ({ ...prev, ...newStatus }));
-      setSamples((prev) => [...prev, ...data.samples]);
     } catch (err) {
-      console.error("Submission error:", err);
-      setError(err.message || "Failed to submit details. Please try again.");
+      setError("Failed to submit. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const checkPaymentStatus = async () => {
-    if (!controlNumber) {
-      alert("Please enter a control number!");
-      return;
-    }
-    if (!token) {
-      setError("No authentication token found. Please log in.");
-      navigate("/");
-      return;
-    }
-    setLoading(true);
+  // Handle Claim
+  const handleClaim = async (sampleId) => {
     try {
-      const firstCtrl = controlNumber.split(",")[0].trim();
-      const response = await fetch(
-        `http://192.168.1.180:8000/api/payments/verify/${firstCtrl}/`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPaymentStatus((prev) => ({ ...prev, [firstCtrl]: data.payment.status }));
-          setPaymentDetails((prev) => ({
-            ...prev,
-            [firstCtrl]: {
-              status: data.payment.status,
-              amount: data.payment.amount || "N/A",
-              date:
-                data.payment.date ||
-                new Date().toLocaleString("en-US", { timeZone: "Africa/Nairobi" }),
-            },
-          }));
-        } else {
-          alert(data.message || "Failed to check payment status");
-        }
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Payment verification failed: ${response.status} - ${errorText}`);
-      }
+      const response = await fetch(`http://192.168.1.180:8000/api/claim-sample/${sampleId}/`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!response.ok) throw new Error("Failed to claim sample.");
+      alert("Sample claimed successfully!");
+      setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== sampleId));
     } catch (err) {
-      console.error("Payment check error:", err);
-      const firstCtrl = controlNumber.split(",")[0].trim();
-      setPaymentStatus((prev) => ({ ...prev, [firstCtrl]: "Pending" }));
-      setPaymentDetails((prev) => ({
-        ...prev,
-        [firstCtrl]: { status: "Pending", amount: "N/A", date: "N/A" },
-      }));
-      alert("Could not verify payment status. Defaulting to Pending.");
-    } finally {
-      setLoading(false);
+      alert("Error claiming sample. Try again.");
     }
   };
 
@@ -280,260 +224,132 @@ export default function RegistrarDashboard() {
     value: ingredient.id,
     label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
-
   const chemOptions = chemIngredients.map((ingredient) => ({
     value: ingredient.id,
     label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
 
-  const handleControlClick = (controlNum, sName) => {
-    setControlNumber(controlNum);
-    setSampleName(sName || "");
-  };
-
   return (
     <Layout menuItems={menuItems}>
       <div className="dashboard-content">
-        {/* Optional welcome header inside content */}
-       
-
         {error && <div className="error-message">{error}</div>}
 
         {/* Register Sample */}
-        {(activeTab === "register-sample" || activeTab === "dashboard") && (
+        {activeTab === "register-sample" && (
           <section className="content-card register-sample-page">
-            <h2 className="section-title">
-              <FaUserPlus className="title-icon" /> Register New Sample(s)
-            </h2>
+            <h2 className="section-title"><FaUserPlus /> Register Customer & Sample</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-section">
                 <h3>Customer Information</h3>
                 <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="customerName">Customer Name </label>
-                    <input
-                      id="customerName"
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
+                  {/* 🟢 NEW: Name fields */}
+                  <div className="form-group"><label>First Name</label><input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></div>
+                  <div className="form-group"><label>Middle Name</label><input value={middleName} onChange={(e) => setMiddleName(e.target.value)} /></div>
+                  <div className="form-group"><label>Last Name</label><input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></div>
+                   {/* 🟢 MODIFIED: Replaced phone-input with a new container for the select/input combo */}
+                  <div className="form-group"><label>Phone Number</label>
+                    <div className="phone-country-select">
+                      <select value={selectedCountry.name} onChange={(e) => setSelectedCountry(countryOptions.find(c => c.name === e.target.value))}>
+                        {countryOptions.map((country) => (
+                          <option key={country.code} value={country.name}>{country.flag} {country.name} ({country.code})</option>
+                        ))}
+                      </select>
+                      <input className="phone-number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="customerPhone">Customer Phone </label>
-                    <input
-                      id="customerPhone"
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="customerEmail">Customer Email </label>
-                    <input
-                      id="customerEmail"
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="customerAddress">Customer Address </label>
-                    <textarea
-                      id="customerAddress"
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      required
-                      disabled={loading}
-                      rows="3"
-                    />
-                  </div>
+                  {/* 🟢 NEW: Email, Country, Region, Street */}
+                  <div className="form-group"><label>Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                  <div className="form-group"><label>Country</label><input value={country} onChange={(e) => setCountry(e.target.value)} required /></div>
+                  <div className="form-group"><label>Region</label><input value={region} onChange={(e) => setRegion(e.target.value)} required /></div>
+                  <div className="form-group"><label>Street</label><input value={street} onChange={(e) => setStreet(e.target.value)} required /></div>
+
+                  {/* 🟢 NEW: Organization Checkbox */}
+                  <div className="form-group checkbox-group"><label>Is Organization?</label><input type="checkbox" checked={isOrganization} onChange={(e) => setIsOrganization(e.target.checked)} /></div>
+
+                  {/* 🟢 NEW: Conditional fields for individuals vs. organizations */}
+                  {!isOrganization ? (
+                    <div className="form-group"><label>National ID</label><input value={nationalId} onChange={(e) => setNationalId(e.target.value)} required /></div>
+                  ) : (
+                    <>
+                      <div className="form-group"><label>Organization Name</label><input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required /></div>
+                      <div className="form-group"><label>Organization ID</label><input value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} required /></div>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="form-section">
-                <h3>Samples & Test Details</h3>
+                <h3>Samples & Tests</h3>
                 {samplesToAdd.map((sample, index) => (
                   <div key={index} className="sample-box">
                     <h4>Sample {index + 1}</h4>
-                    <div className="form-group">
-                      <label>Sample Name *</label>
-                      <input
-                        type="text"
-                        value={sample.sample_name}
-                        onChange={(e) => handleSampleChange(index, "sample_name", e.target.value)}
-                        required
-                        disabled={loading}
-                      />
+                    <div className="sample-inputs-group">
+                      <div className="form-group"><label>Sample Name</label><input value={sample.sample_name} onChange={(e) => handleSampleChange(index, "sample_name", e.target.value)} required /></div>
+                      <div className="form-group"><label>Sample Details</label><textarea value={sample.sample_details} onChange={(e) => handleSampleChange(index, "sample_details", e.target.value)} required /></div>
                     </div>
-                    <div className="form-group">
-                      <label>Sample Details *</label>
-                      <textarea
-                        value={sample.sample_details}
-                        onChange={(e) => handleSampleChange(index, "sample_details", e.target.value)}
-                        required
-                        disabled={loading}
-                        rows="2"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Microbiology Tests</label>
-                      {microIngredients.length > 0 ? (
-                        <Select
-                          isMulti
-                          options={microOptions}
-                          value={microOptions.filter((opt) =>
-                            sample.selected_micro_ingredients.includes(opt.value)
-                          )}
-                          onChange={(selected) => handleSelectChange(index, selected, "microbiology")}
-                          isDisabled={loading}
-                          className="react-select-container"
-                          classNamePrefix="react-select"
-                          hideSelectedOptions={false}
-                          components={{ MultiValue: () => null }}
-                        />
-                      ) : (
-                        <p>{error || "Loading tests..."}</p>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label>Chemistry Tests</label>
-                      {chemIngredients.length > 0 ? (
-                        <Select
-                          isMulti
-                          options={chemOptions}
-                          value={chemOptions.filter((opt) =>
-                            sample.selected_chem_ingredients.includes(opt.value)
-                          )}
-                          onChange={(selected) => handleSelectChange(index, selected, "chemistry")}
-                          isDisabled={loading}
-                          className="react-select-container"
-                          classNamePrefix="react-select"
-                          hideSelectedOptions={false}
-                          components={{ MultiValue: () => null }}
-                        />
-                      ) : (
-                        <p>{error || "Loading tests..."}</p>
-                      )}
-                    </div>
-
-                    <div className="selected-micro-tests">
-                      <strong>Selected Microbiology Tests:</strong>
-                      {sample.selected_micro_ingredients.map((id) => {
-                        const ing = ingredients.find((x) => x.id === id);
-                        return ing ? <div key={id}>- {ing.name} (TZS {ing.price})</div> : null;
-                      })}
-                    </div>
-
-                    <div className="selected-chem-tests">
-                      <strong>Selected Chemistry Tests:</strong>
-                      {sample.selected_chem_ingredients.map((id) => {
-                        const ing = ingredients.find((x) => x.id === id);
-                        return ing ? <div key={id}>- {ing.name} (TZS {ing.price})</div> : null;
-                      })}
-                    </div>
+                    
+                    <label>Microbiology Tests</label>
+                    <Select isMulti options={microOptions} value={microOptions.filter((opt) => sample.selected_micro_ingredients.includes(opt.value))} onChange={(sel) => handleSelectChange(index, sel, "microbiology")} />
+                    
+                    <label>Chemistry Tests</label>
+                    <Select isMulti options={chemOptions} value={chemOptions.filter((opt) => sample.selected_chem_ingredients.includes(opt.value))} onChange={(sel) => handleSelectChange(index, sel, "chemistry")} />
                   </div>
                 ))}
-                <button type="button" className="add-sample-btn" onClick={addNewSample}>
-                  <FaPlusCircle /> Add Another Sample
-                </button>
+                <button type="button" onClick={addNewSample} className="add-sample-btn"><FaPlusCircle /> Add Another Sample</button>
               </div>
 
-              <div className="total-price-display">
-                <strong>Total Amount Due:</strong> TZS {calculateTotalPrice()}
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? "Submitting..." : "Submit & Get Payment Info"}
-                </button>
-                {controlNumber && (
-                  <div className="control-display">
-                    Control Number(s): <strong>{controlNumber}</strong>
-                  </div>
-                )}
-              </div>
+              <div className="total-price-display"><strong>Total Price:</strong> TZS {calculateTotalPrice()}</div>
+              <button type="submit" className="submit-btn" disabled={loading}>{loading ? "Submitting..." : "Submit"}</button>
             </form>
+          </section>
+        
+        )}
+
+        {/* Claim Submissions */}
+        {activeTab === "claim-submissions" && (
+          <section className="content-card">
+            <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
+            {unclaimedSamples.length === 0 ? (
+              <p>No unclaimed samples at the moment.</p>
+            ) : (
+              <table className="samples-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Sample Name</th>
+                    <th>Details</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unclaimedSamples.map((sample) => (
+                    <tr key={sample.id}>
+                      <td>{sample.id}</td>
+                      <td>{sample.customer_name}</td>
+                      <td>{sample.sample_name}</td>
+                      <td>{sample.sample_details}</td>
+                      <td><button onClick={() => handleClaim(sample.id)}>Claim</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </section>
         )}
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (
-          <section className="content-card verify-payment-page">
-            <h2 className="section-title">
-              <FaFlask className="title-icon" /> Verify Payment Status
-            </h2>
-
-            {error && <div className="error-message">{error}</div>}
-
-            <div className="table-wrapper">
-              <table className="payment-table">
-                <thead>
-                  <tr>
-                    <th>Customer Name</th>
-                    <th>Sample Details</th>
-                    <th>Ingredients</th>
-                    <th>Control Number</th>
-                    <th>Payment Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {samples.map((sample) => (
-                    <tr key={sample.id}>
-                      <td>{sample.customer?.name || "N/A"}</td>
-                      <td>{sample.sample_details || "N/A"}</td>
-                      <td>
-                        {sample.tests && sample.tests.length > 0
-                          ? sample.tests.map((t) => t.ingredient?.name || "N/A").join(", ")
-                          : pendingTests
-                              .filter((t) => t.sample === sample.id)
-                              .map((t) => t.ingredient?.name || "N/A")
-                              .join(", ") || "N/A"}
-                      </td>
-                      <td
-                        style={{ cursor: "pointer", color: "#0077b6" }}
-                        onClick={() => handleControlClick(sample.control_number, sample.name)}
-                      >
-                        {sample.control_number}
-                      </td>
-                      <td>{paymentStatus[sample.control_number] || "Pending"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="form-group">
-              <input
-                type="text"
-                value={controlNumber}
-                onChange={(e) => setControlNumber(e.target.value)}
-                placeholder="Click a control number to populate"
-              />
-              <button className="verify-btn" onClick={checkPaymentStatus} disabled={loading}>
-                {loading ? "Checking..." : "Check Payment Status"}
-              </button>
-            </div>
-
-            {controlNumber && paymentStatus[controlNumber] && (
-              <div className={`payment-status ${paymentStatus[controlNumber].toLowerCase()}`}>
-                Payment Status: {paymentStatus[controlNumber]}
-              </div>
-            )}
+          <section className="content-card">
+            <h2 className="section-title"><FaFlask /> Verify Payment</h2>
+            <p>Registrar can check payment manually here if finance provides control/reference number.</p>
           </section>
         )}
 
-        {/* Sample History (placeholder to keep structure identical) */}
+        {/* History */}
         {activeTab === "sample-history" && (
           <section className="content-card">
-            <h2 className="section-title">
-              <FaHistory className="title-icon" /> Sample History
-            </h2>
+            <h2 className="section-title"><FaHistory /> Sample History</h2>
             <p>Coming soon…</p>
           </section>
         )}
