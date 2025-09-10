@@ -46,7 +46,7 @@ return (
 <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
 <Route path="/Registrar-dashboard" element={<RegistrarDashboard />} />
-<Route path="/Registrar-dashboard/register-sample" element={<RegistrarDashboard />} />
+<Route path="/Registrar-dashboard/register-sample" element={<RegistrarDashboard />} />  <Route path="/registrar-dashboard/claim-submissions" element={<RegistrarDashboard />} />
 <Route path="/Registrar-dashboard/verify-payment" element={<RegistrarDashboard />} />
 <Route path="/Registrar-dashboard/sample-history" element={<RegistrarDashboard />} />
 

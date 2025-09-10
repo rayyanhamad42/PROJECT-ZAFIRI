@@ -511,3 +511,75 @@ html {
     font-weight: 600;
     color: var(--text-dark);
 }
+
+/* --- Modal --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+/* Modal Content Theme */
+.modal-content {
+  background-color: #ffffff; /* clean white background */
+  border-left: 6px solid #1CA3DE; /* highlight with theme color */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  width: 400px;
+  max-width: 90%;
+  transform: translateY(-50px);
+  animation: slideIn 0.3s ease forwards;
+}
+
+.modal-actions .submit-btn {
+  background-color: #1CA3DE;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+
+.modal-actions .submit-btn:hover {
+  background-color: #1690b8; /* slightly darker on hover */
+}
+
+.modal-actions .add-sample-btn {
+  background-color: #f0f0f0;
+  color: #333333;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+
+.modal-actions .add-sample-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.modal-content h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  color: var(--text-dark);
+  margin-bottom: 25px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}

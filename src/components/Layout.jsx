@@ -64,7 +64,7 @@ const Layout = ({ children, menuItems = [] }) => {
         <main className="dashboard-content">{children}</main>
 
         <footer className="footer">
-          <p>&copy; 2025 Marine Laboratory Management System</p>
+          <p>&copy; 2025 Zafiri Laboratory Management System</p>
         </footer>
       </div>
     </div>

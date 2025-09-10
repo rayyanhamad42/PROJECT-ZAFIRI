@@ -34,13 +34,14 @@ export default function RegistrarDashboard() {
   const [organizationName, setOrganizationName] = useState("");
   const [organizationId, setOrganizationId] = useState("");
   
+    const [modalSample, setModalSample] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [token] = useState(localStorage.getItem("access_token"));
 
-     const countryOptions = [
+  const countryOptions = [
     { name: "TZ", code: "+255", flag: "🇹🇿" },
     { name: "KE", code: "+254", flag: "🇰🇪" },
   ];
@@ -85,7 +86,7 @@ export default function RegistrarDashboard() {
         });
         if (ingRes.ok) {
           const ingData = await ingRes.json();
-          const all = ingData.ingredients || [];
+          const all = Array.isArray(ingData) ? ingData : [];  // ✅ FIXED
           setIngredients(all);
           setMicroIngredients(all.filter((ing) => ing.test_type === "Microbiology"));
           setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
@@ -152,7 +153,7 @@ export default function RegistrarDashboard() {
         first_name: firstName,
         middle_name: middleName,
         last_name: lastName,
-       phone_number: phoneNumber,
+        phone_number: phoneNumber,
         phone_country_code: selectedCountry.code,
         email: email,
         country: country,
@@ -185,7 +186,6 @@ export default function RegistrarDashboard() {
       setFirstName("");
       setMiddleName("");
       setLastName("");
-  
       setPhoneNumber("");
       setEmail("");
       setCountry("");
@@ -195,7 +195,7 @@ export default function RegistrarDashboard() {
       setNationalId("");
       setOrganizationName("");
       setOrganizationId("");
-       setSelectedCountry(countryOptions[0]); 
+      setSelectedCountry(countryOptions[0]); 
       setSamplesToAdd([{ sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
 
     } catch (err) {
@@ -242,11 +242,9 @@ export default function RegistrarDashboard() {
               <div className="form-section">
                 <h3>Customer Information</h3>
                 <div className="form-grid">
-                  {/* 🟢 NEW: Name fields */}
                   <div className="form-group"><label>First Name</label><input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></div>
                   <div className="form-group"><label>Middle Name</label><input value={middleName} onChange={(e) => setMiddleName(e.target.value)} /></div>
                   <div className="form-group"><label>Last Name</label><input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></div>
-                   {/* 🟢 MODIFIED: Replaced phone-input with a new container for the select/input combo */}
                   <div className="form-group"><label>Phone Number</label>
                     <div className="phone-country-select">
                       <select value={selectedCountry.name} onChange={(e) => setSelectedCountry(countryOptions.find(c => c.name === e.target.value))}>
@@ -257,16 +255,11 @@ export default function RegistrarDashboard() {
                       <input className="phone-number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
                     </div>
                   </div>
-                  {/* 🟢 NEW: Email, Country, Region, Street */}
                   <div className="form-group"><label>Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
                   <div className="form-group"><label>Country</label><input value={country} onChange={(e) => setCountry(e.target.value)} required /></div>
                   <div className="form-group"><label>Region</label><input value={region} onChange={(e) => setRegion(e.target.value)} required /></div>
                   <div className="form-group"><label>Street</label><input value={street} onChange={(e) => setStreet(e.target.value)} required /></div>
-
-                  {/* 🟢 NEW: Organization Checkbox */}
                   <div className="form-group checkbox-group"><label>Is Organization?</label><input type="checkbox" checked={isOrganization} onChange={(e) => setIsOrganization(e.target.checked)} /></div>
-
-                  {/* 🟢 NEW: Conditional fields for individuals vs. organizations */}
                   {!isOrganization ? (
                     <div className="form-group"><label>National ID</label><input value={nationalId} onChange={(e) => setNationalId(e.target.value)} required /></div>
                   ) : (
@@ -302,41 +295,90 @@ export default function RegistrarDashboard() {
               <button type="submit" className="submit-btn" disabled={loading}>{loading ? "Submitting..." : "Submit"}</button>
             </form>
           </section>
-        
         )}
 
         {/* Claim Submissions */}
-        {activeTab === "claim-submissions" && (
-          <section className="content-card">
-            <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
-            {unclaimedSamples.length === 0 ? (
-              <p>No unclaimed samples at the moment.</p>
-            ) : (
-              <table className="samples-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Sample Name</th>
-                    <th>Details</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unclaimedSamples.map((sample) => (
-                    <tr key={sample.id}>
-                      <td>{sample.id}</td>
-                      <td>{sample.customer_name}</td>
-                      <td>{sample.sample_name}</td>
-                      <td>{sample.sample_details}</td>
-                      <td><button onClick={() => handleClaim(sample.id)}>Claim</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
-        )}
+     {activeTab === "claim-submissions" && (
+  <section className="content-card">
+    <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
+
+    {unclaimedSamples.length === 0 ? (
+      <p>No unclaimed samples at the moment.</p>
+    ) : (
+      <table className="samples-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Sample Name</th>
+            <th>Details</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {unclaimedSamples.map((sample) => (
+            <tr key={sample.id}>
+              <td>{sample.id}</td>
+              <td>{sample.customer_name}</td>
+              <td>{sample.sample_name}</td>
+              <td>{sample.sample_details}</td>
+              <td>
+                <button
+                  className="claim-btn"
+                  onClick={() => setModalSample(sample)}
+                >
+                  Claim
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+    {/* Modal */}
+    {modalSample && (
+      <div className="modal-overlay" onClick={() => setModalSample(null)}>
+        <div
+          className="modal-content"
+          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
+        >
+          <h3>Claim Sample</h3>
+          <p>
+            Are you sure you want to claim sample <strong>{modalSample.sample_name}</strong> for customer <strong>{modalSample.customer_name}</strong>?
+          </p>
+          <div className="modal-actions">
+            <button
+              className="submit-btn"
+              onClick={async () => {
+                try {
+                  const response = await fetch(`http://192.168.1.180:8000/api/claim-sample/${modalSample.id}/`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                  });
+                  if (!response.ok) throw new Error("Failed to claim sample.");
+                  alert("Sample claimed successfully!");
+                  setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== modalSample.id));
+                  setModalSample(null);
+                } catch (err) {
+                  alert("Error claiming sample. Try again.");
+                }
+              }}
+            >
+              Confirm
+            </button>
+            <button
+              className="add-sample-btn"
+              onClick={() => setModalSample(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+)}
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (
