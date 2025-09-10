@@ -10,6 +10,8 @@ import {
   FaClipboardCheck,
 } from "react-icons/fa";
 import Select from "react-select";
+import ClaimSubmission from "./ClaimSubmission";
+
 import Layout from "../components/Layout";
 import "./RegistrarDashboard.css";
 
