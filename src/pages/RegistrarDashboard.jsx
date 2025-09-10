@@ -19,11 +19,10 @@ export default function RegistrarDashboard() {
 
   const [registrarName] = useState(localStorage.getItem("username") || "Registrar");
 
-  // 🟢 UPDATED: Added new customer fields
+  // Customer fields
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [phoneCountryCode, setPhoneCountryCode] = useState("+255");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
@@ -33,8 +32,8 @@ export default function RegistrarDashboard() {
   const [nationalId, setNationalId] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [organizationId, setOrganizationId] = useState("");
-  
-    const [modalSample, setModalSample] = useState(null);
+
+  const [modalSample, setModalSample] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const [error, setError] = useState("");
@@ -51,7 +50,12 @@ export default function RegistrarDashboard() {
   const [microIngredients, setMicroIngredients] = useState([]);
   const [chemIngredients, setChemIngredients] = useState([]);
   const [samplesToAdd, setSamplesToAdd] = useState([
-    { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
+    {
+      sample_name: "",
+      sample_details: "",
+      selected_micro_ingredients: [],
+      selected_chem_ingredients: [],
+    },
   ]);
 
   // Claim feature
@@ -86,7 +90,7 @@ export default function RegistrarDashboard() {
         });
         if (ingRes.ok) {
           const ingData = await ingRes.json();
-          const all = Array.isArray(ingData) ? ingData : [];  // ✅ FIXED
+          const all = Array.isArray(ingData) ? ingData : [];
           setIngredients(all);
           setMicroIngredients(all.filter((ing) => ing.test_type === "Microbiology"));
           setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
@@ -115,19 +119,35 @@ export default function RegistrarDashboard() {
 
   const handleSelectChange = (index, selectedOptions, category) => {
     const updated = [...samplesToAdd];
-    const field = category === "microbiology" ? "selected_micro_ingredients" : "selected_chem_ingredients";
-    updated[index][field] = selectedOptions ? selectedOptions.map((o) => o.value) : [];
+    const field =
+      category === "microbiology"
+        ? "selected_micro_ingredients"
+        : "selected_chem_ingredients";
+    updated[index][field] = selectedOptions
+      ? selectedOptions.map((o) => o.value)
+      : [];
     setSamplesToAdd(updated);
   };
 
   const addNewSample = () => {
-    setSamplesToAdd((prev) => [...prev, { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
+    setSamplesToAdd((prev) => [
+      ...prev,
+      {
+        sample_name: "",
+        sample_details: "",
+        selected_micro_ingredients: [],
+        selected_chem_ingredients: [],
+      },
+    ]);
   };
 
   const calculateTotalPrice = () => {
     let testsPrice = 0;
     samplesToAdd.forEach((sample) => {
-      const allSelected = [...sample.selected_micro_ingredients, ...sample.selected_chem_ingredients];
+      const allSelected = [
+        ...sample.selected_micro_ingredients,
+        ...sample.selected_chem_ingredients,
+      ];
       allSelected.forEach((id) => {
         const ing = ingredients.find((x) => x.id === id);
         if (ing) testsPrice += parseFloat(ing.price || 0);
@@ -167,7 +187,10 @@ export default function RegistrarDashboard() {
       samples: samplesToAdd.map((s) => ({
         sample_name: s.sample_name,
         sample_details: s.sample_details,
-        selected_ingredients: [...s.selected_micro_ingredients, ...s.selected_chem_ingredients],
+        selected_ingredients: [
+          ...s.selected_micro_ingredients,
+          ...s.selected_chem_ingredients,
+        ],
       })),
     };
 
@@ -182,7 +205,7 @@ export default function RegistrarDashboard() {
 
       alert("Samples submitted successfully! Registrar has registered the customer & sample.");
 
-      // 🟢 Clear form fields after successful submission
+      // Clear form fields
       setFirstName("");
       setMiddleName("");
       setLastName("");
@@ -195,9 +218,10 @@ export default function RegistrarDashboard() {
       setNationalId("");
       setOrganizationName("");
       setOrganizationId("");
-      setSelectedCountry(countryOptions[0]); 
-      setSamplesToAdd([{ sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] }]);
-
+      setSelectedCountry(countryOptions[0]);
+      setSamplesToAdd([
+        { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
+      ]);
     } catch (err) {
       setError("Failed to submit. Try again.");
     } finally {
@@ -298,87 +322,88 @@ export default function RegistrarDashboard() {
         )}
 
         {/* Claim Submissions */}
-     {activeTab === "claim-submissions" && (
-  <section className="content-card">
-    <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
+        {activeTab === "claim-submissions" && (
+          <section className="content-card">
+            <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
 
-    {unclaimedSamples.length === 0 ? (
-      <p>No unclaimed samples at the moment.</p>
-    ) : (
-      <table className="samples-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Sample Name</th>
-            <th>Details</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {unclaimedSamples.map((sample) => (
-            <tr key={sample.id}>
-              <td>{sample.id}</td>
-              <td>{sample.customer_name}</td>
-              <td>{sample.sample_name}</td>
-              <td>{sample.sample_details}</td>
-              <td>
-                <button
-                  className="claim-btn"
-                  onClick={() => setModalSample(sample)}
-                >
-                  Claim
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
+            {unclaimedSamples.length === 0 ? (
+              <p>No unclaimed samples at the moment.</p>
+            ) : (
+              <table className="samples-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Sample Details</th>
+                    <th>Payment Due</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unclaimedSamples.map((sample) => (
+                    <tr key={sample.id}>
+                      <td>{sample.id}</td>
+                      <td>{sample.customer?.name}</td>
+                      <td>{sample.customer?.email}</td>
+                      <td>{sample.customer?.phone_number}</td>
+                      <td>{sample.sample_details}</td>
+                      <td>{sample.payment?.amount_due} TZS</td>
+                      <td>{sample.payment?.status}</td>
+                      <td>
+                        <button
+                          className="claim-btn"
+                          onClick={() => setModalSample(sample)}
+                        >
+                          Claim
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
-    {/* Modal */}
-    {modalSample && (
-      <div className="modal-overlay" onClick={() => setModalSample(null)}>
-        <div
-          className="modal-content"
-          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
-        >
-          <h3>Claim Sample</h3>
-          <p>
-            Are you sure you want to claim sample <strong>{modalSample.sample_name}</strong> for customer <strong>{modalSample.customer_name}</strong>?
-          </p>
-          <div className="modal-actions">
-            <button
-              className="submit-btn"
-              onClick={async () => {
-                try {
-                  const response = await fetch(`http://192.168.1.180:8000/api/claim-sample/${modalSample.id}/`, {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-                  });
-                  if (!response.ok) throw new Error("Failed to claim sample.");
-                  alert("Sample claimed successfully!");
-                  setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== modalSample.id));
-                  setModalSample(null);
-                } catch (err) {
-                  alert("Error claiming sample. Try again.");
-                }
-              }}
-            >
-              Confirm
-            </button>
-            <button
-              className="add-sample-btn"
-              onClick={() => setModalSample(null)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-  </section>
-)}
+            {/* Modal */}
+            {modalSample && (
+              <div className="modal-overlay" onClick={() => setModalSample(null)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <h3>Claim Sample</h3>
+                  <p>
+                    Are you sure you want to claim sample <strong>{modalSample.sample_details}</strong> for customer <strong>{modalSample.customer?.name}</strong>?
+                  </p>
+                  <p><strong>Payment Due:</strong> {modalSample.payment?.amount_due} TZS</p>
+                  <div className="modal-actions">
+                    <button
+                      className="submit-btn"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`http://192.168.1.180:8000/api/claim-sample/${modalSample.id}/`, {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                          });
+                          if (!response.ok) throw new Error("Failed to claim sample.");
+                          alert("Sample claimed successfully!");
+                          setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== modalSample.id));
+                          setModalSample(null);
+                        } catch (err) {
+                          alert("Error claiming sample. Try again.");
+                        }
+                      }}
+                    >
+                      Confirm
+                    </button>
+                    <button className="add-sample-btn" onClick={() => setModalSample(null)}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (
