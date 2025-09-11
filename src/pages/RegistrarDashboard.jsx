@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import Select from "react-select";
 import Layout from "../components/Layout";
+import ClaimSubmission from "./ClaimSubmission"; // ClaimSubmissions component (mock + styles)
 import "./RegistrarDashboard.css";
 
 export default function RegistrarDashboard() {
@@ -44,7 +45,7 @@ export default function RegistrarDashboard() {
     { name: "TZ", code: "+255", flag: "🇹🇿" },
     { name: "KE", code: "+254", flag: "🇰🇪" },
   ];
-  const [selectedCountry, setSelectedCountry] = useState(countryOptions[0]);
+  const [selectedCountry, setSelectedCountry] = useState(countryOptions[0]); // Default to Tanzania
 
   const [ingredients, setIngredients] = useState([]);
   const [microIngredients, setMicroIngredients] = useState([]);
@@ -58,7 +59,7 @@ export default function RegistrarDashboard() {
     },
   ]);
 
-  // Claim feature
+  // Claim feature (kept for compatibility if you later use it here)
   const [unclaimedSamples, setUnclaimedSamples] = useState([]);
 
   const MARKING_FEE = 10000.0;
@@ -71,6 +72,7 @@ export default function RegistrarDashboard() {
     { name: "Sample History", path: "/registrar-dashboard/sample-history", icon: <FaHistory /> },
   ];
 
+  // set active tab based on route path (keeps existing behavior)
   useEffect(() => {
     const { pathname } = location;
     if (pathname.includes("verify-payment")) setActiveTab("verify-payment");
@@ -80,6 +82,7 @@ export default function RegistrarDashboard() {
     else setActiveTab("dashboard");
   }, [location.pathname]);
 
+  // fetch ingredients and unclaimed samples (kept as before)
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
@@ -96,7 +99,7 @@ export default function RegistrarDashboard() {
           setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
         }
 
-        // Load Unclaimed Submissions
+        // Load Unclaimed Submissions (kept but ClaimSubmission uses its own mock for UI)
         const claimRes = await fetch("http://192.168.1.180:8000/api/unclaimed-samples/", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -195,7 +198,7 @@ export default function RegistrarDashboard() {
     };
 
     try {
-      const response = await fetch("http://192.168.1.180:8000/api/customer/submit-sample/", {
+      const response = await fetch("http://192.168.1.180:8000/api/registrar/register-sample/", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -203,7 +206,7 @@ export default function RegistrarDashboard() {
 
       if (!response.ok) throw new Error("Submission failed.");
 
-      alert("Samples submitted successfully!");
+      alert("Samples submitted successfully! Registrar has registered the customer & sample.");
 
       // Clear form fields
       setFirstName("");
@@ -229,21 +232,6 @@ export default function RegistrarDashboard() {
     }
   };
 
-  // Handle Claim
-  const handleClaim = async (sampleId) => {
-    try {
-      const response = await fetch(`http://192.168.1.180:8000/api/registrar/claim/${sampleId}/`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
-      if (!response.ok) throw new Error("Failed to claim sample.");
-      alert("Sample claimed successfully!");
-      setUnclaimedSamples(unclaimedSamples.filter((s) => s.id !== sampleId));
-    } catch (err) {
-      alert("Error claiming sample. Try again.");
-    }
-  };
-
   const microOptions = microIngredients.map((ingredient) => ({
     value: ingredient.id,
     label: `${ingredient.name} (TZS ${ingredient.price})`,
@@ -259,7 +247,7 @@ export default function RegistrarDashboard() {
         {error && <div className="error-message">{error}</div>}
 
         {/* Register Sample */}
-        {activeTab === "register-sample" && (
+        {(activeTab === "register-sample" || activeTab === "dashboard") && (
           <section className="content-card register-sample-page">
             <h2 className="section-title"><FaUserPlus /> Register Customer & Sample</h2>
             <form onSubmit={handleSubmit}>
@@ -320,83 +308,30 @@ export default function RegistrarDashboard() {
             </form>
           </section>
         )}
-
-        {/* Claim Submissions */}
+        {/* Claim Submissions - only visible when activeTab is claim-submissions */}
         {activeTab === "claim-submissions" && (
-          <section className="content-card">
-            <h2 className="section-title"><FaClipboardCheck /> Claim Submissions</h2>
+          <>
+            {/* Stats Cards */}
+            <div className="stats-cards">
+              <div className="stat-card approved">
+                <h3>Approved</h3>
+                <p>{unclaimedSamples.filter(s => s.payment?.status === "approved").length}</p>
+              </div>
+              <div className="stat-card pending">
+                <h3>Pending</h3>
+                <p>{unclaimedSamples.filter(s => s.payment?.status === "pending").length}</p>
+              </div>
+              <div className="stat-card total">
+                <h3>Total</h3>
+                <p>{unclaimedSamples.length}</p>
+              </div>
+            </div>
 
-            <table className="samples-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>First Name</th>
-                  <th>Middle Name</th>
-                  <th>Last Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Country</th>
-                  <th>Region</th>
-                  <th>Street</th>
-                  <th>National ID</th>
-                  <th>Organization</th>
-                  <th>Sample Details</th>
-                  <th>Payment Due</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {unclaimedSamples.length > 0 ? (
-                  unclaimedSamples.map((sample) => (
-                    <tr key={sample.id}>
-                      <td>{sample.id}</td>
-                      <td>{sample.customer?.first_name}</td>
-                      <td>{sample.customer?.middle_name}</td>
-                      <td>{sample.customer?.last_name}</td>
-                      <td>{sample.customer?.email}</td>
-                      <td>
-                        {sample.customer?.phone_country_code}{" "}
-                        {sample.customer?.phone_number}
-                      </td>
-                      <td>{sample.customer?.country}</td>
-                      <td>{sample.customer?.region}</td>
-                      <td>{sample.customer?.street}</td>
-                      <td>{sample.customer?.national_id}</td>
-                      <td>
-                        {sample.customer?.is_organization
-                          ? `${sample.customer?.organization_name} (${sample.customer?.organization_id})`
-                          : "N/A"}
-                      </td>
-                      <td>{sample.sample_details}</td>
-                      <td>{sample.payment?.amount_due} TZS</td>
-                      <td
-                        className={
-                          sample.payment?.status === "Pending"
-                            ? "status-pending"
-                            : "status-approved"
-                        }
-                      >
-                        {sample.payment?.status}
-                      </td>
-                      <td>
-                        <button className="claim-btn" onClick={() => handleClaim(sample.id)}>
-                          Claim
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="15" style={{ textAlign: "center", padding: "10px" }}>
-                      No unclaimed samples at the moment.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </section>
+            {/* Claim Submission table/list */}
+            <ClaimSubmission />
+          </>
         )}
+
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (

@@ -1,68 +1,50 @@
 import React, { useState } from "react";
 import { FaClipboardCheck } from "react-icons/fa";
 import "./ClaimSubmission.css";
+// import "./RegistrarDashboard.css";
+
 
 export default function ClaimSubmission() {
-  const [modalSample, setModalSample] = useState(null);
+  const token = localStorage.getItem("token");
 
-  // Mock Data (Customer Details)
+  // Mock data for now (you’ll replace with backend later)
   const [unclaimedSamples, setUnclaimedSamples] = useState([
     {
       id: 1,
-      customer: {
-        first_name: "John",
-        middle_name: "M.",
-        last_name: "Doe",
-        phone_country_code: "+255",
-        phone_number: "712345678",
-        email: "john@example.com",
-        country: "Tanzania",
-        region: "Zanzibar",
-        street: "Stone Town",
-        is_organization: false,
-        national_id: "1234567890",
-        organization_name: "",
-        organization_id: "",
-      },
-      sample_details: "Water Quality Test",
-      payment: { amount_due: 50000, status: "pending" },
-    },
-    {
-      id: 2,
-      customer: {
-        first_name: "Aisha",
-        middle_name: "",
-        last_name: "Hassan",
-        phone_country_code: "+255",
-        phone_number: "765432198",
-        email: "aisha@example.com",
-        country: "Tanzania",
-        region: "Pemba",
-        street: "Chake Chake",
-        is_organization: true,
-        national_id: "",
-        organization_name: "Blue Ocean Org",
-        organization_id: "ORG12345",
-      },
-      sample_details: "Fish Species Analysis",
-      payment: { amount_due: 75000, status: "approved" },
+      first_name: "Ali",
+      middle_name: "H.",
+      last_name: "Juma",
+      phone_country_code: "+255",
+      phone_number: "712345678",
+      email: "ali@example.com",
+      country: "Tanzania",
+      region: "Zanzibar",
+      street: "Stone Town",
+      is_organization: false,
+      national_id: "12345678",
+      organization_name: "",
+      organization_id: "",
+      sample_details: "Water quality test",
+      payment: { amount_due: 50000, status: "Pending" },
     },
   ]);
 
+  const [modalSample, setModalSample] = useState(null);
+
   return (
-    <section className="claim-submission-container">
-      <h2 className="claim-title">
+    
+    <section className="content-card">
+      <h2 className="section-title">
         <FaClipboardCheck /> Claim Submissions
       </h2>
 
-      <table className="claim-table">
+      <table className="samples-table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Customer</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Region</th>
             <th>Sample Details</th>
             <th>Payment Due</th>
             <th>Status</th>
@@ -71,41 +53,44 @@ export default function ClaimSubmission() {
         </thead>
         <tbody>
           {unclaimedSamples.length > 0 ? (
-            unclaimedSamples.map((sample) => {
-              const c = sample.customer;
-              const customerName = c.is_organization
-                ? c.organization_name
-                : `${c.first_name} ${c.middle_name} ${c.last_name}`;
-              return (
-                <tr key={sample.id}>
-                  <td>{sample.id}</td>
-                  <td>{customerName}</td>
-                  <td>{c.email}</td>
-                  <td>{`${c.phone_country_code} ${c.phone_number}`}</td>
-                  <td>{c.region}</td>
-                  <td>{sample.sample_details}</td>
-                  <td>{sample.payment?.amount_due} TZS</td>
-                  <td>
-                    <span
-                      className={`status-badge ${sample.payment?.status}`}
-                    >
-                      {sample.payment?.status}
-                    </span>
-                  </td>
-                  <td>
+            unclaimedSamples.map((sample) => (
+              <tr key={sample.id}>
+                <td>{sample.id}</td>
+                <td>
+                  {sample.first_name} {sample.middle_name} {sample.last_name}
+                </td>
+                <td>{sample.email}</td>
+                <td>
+                  {sample.phone_country_code} {sample.phone_number}
+                </td>
+                <td>{sample.sample_details}</td>
+                <td>{sample.payment?.amount_due} TZS</td>
+                <td>
+                  <span
+                    className={`status-badge ${
+                      sample.payment?.status === "Pending"
+                        ? "status-pending"
+                        : "status-approved"
+                    }`}
+                  >
+                    {sample.payment?.status}
+                  </span>
+                </td>
+                <td>
+                  {sample.payment?.status === "Pending" && (
                     <button
-                      className="view-btn"
+                      className="claim-btn"
                       onClick={() => setModalSample(sample)}
                     >
                       Claim
                     </button>
-                  </td>
-                </tr>
-              );
-            })
+                  )}
+                </td>
+              </tr>
+            ))
           ) : (
             <tr>
-              <td colSpan="9" style={{ textAlign: "center", padding: "10px" }}>
+              <td colSpan="8" style={{ textAlign: "center", padding: "10px" }}>
                 No unclaimed samples at the moment.
               </td>
             </tr>
@@ -116,18 +101,13 @@ export default function ClaimSubmission() {
       {/* Modal */}
       {modalSample && (
         <div className="modal-overlay" onClick={() => setModalSample(null)}>
-          <div
-            className="modal-content slide-down"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Claim Sample</h3>
             <p>
-              Are you sure you want to claim{" "}
-              <strong>{modalSample.sample_details}</strong> for{" "}
+              Are you sure you want to claim sample{" "}
+              <strong>{modalSample.sample_details}</strong> for customer{" "}
               <strong>
-                {modalSample.customer.is_organization
-                  ? modalSample.customer.organization_name
-                  : `${modalSample.customer.first_name} ${modalSample.customer.middle_name} ${modalSample.customer.last_name}`}
+                {modalSample.first_name} {modalSample.last_name}
               </strong>
               ?
             </p>
@@ -137,11 +117,18 @@ export default function ClaimSubmission() {
             </p>
             <div className="modal-actions">
               <button
-                className="approve-btn"
+                className="submit-btn"
                 onClick={() => {
-                  alert("Sample claimed successfully!");
-                  setUnclaimedSamples(
-                    unclaimedSamples.filter((s) => s.id !== modalSample.id)
+                  // ✅ Update status locally to Approved
+                  setUnclaimedSamples((prev) =>
+                    prev.map((s) =>
+                      s.id === modalSample.id
+                        ? {
+                            ...s,
+                            payment: { ...s.payment, status: "Approved" },
+                          }
+                        : s
+                    )
                   );
                   setModalSample(null);
                 }}
@@ -149,7 +136,7 @@ export default function ClaimSubmission() {
                 Confirm
               </button>
               <button
-                className="close-btn"
+                className="add-sample-btn"
                 onClick={() => setModalSample(null)}
               >
                 Cancel

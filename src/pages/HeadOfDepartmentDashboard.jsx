@@ -1,62 +1,52 @@
-import React, { useState } from "react";
+// src/pages/HeadOfDepartmentDashboard.jsx
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { FaTachometerAlt, FaFlask, FaUsers } from "react-icons/fa";
 import "./HeadOfDepartmentDashboard.css";
 
 const HeadOfDepartmentDashboard = () => {
-  const [pendingSamples, setPendingSamples] = useState([
-    {
-      id: 101,
-      sample_details: "Blood Sample A",
-      tests: [{ category: "Chemistry", ingredient: { name: "Hemoglobin" } }],
-      control_number: "CTRL-001",
-      status: "In Progress",
-      assigned_date: "2025-09-01T10:30:00Z",
-      assigned_to_technician: [{ id: 1, username: "tech1", category: "Chemistry" }]
-    },
-    {
-      id: 102,
-      sample_details: "Urine Sample B",
-      tests: [{ category: "Microbiology", ingredient: { name: "Glucose" } }],
-      control_number: "CTRL-002",
-      status: "Completed",
-      assigned_date: "2025-09-02T12:00:00Z",
-      assigned_to_technician: [{ id: 2, username: "tech2", category: "Microbiology" }]
-    },
-    {
-      id: 103,
-      sample_details: "Blood Sample C",
-      tests: [],
-      control_number: "CTRL-003",
-      status: "Pending",
-      assigned_date: null,
-      assigned_to_technician: []
-    }
-  ]);
-
+  const [pendingSamples, setPendingSamples] = useState([]);
   const [technicians] = useState([
     { id: 1, username: "tech1" },
     { id: 2, username: "tech2" },
     { id: 3, username: "tech3" },
   ]);
-
   const [showModal, setShowModal] = useState(false);
   const [selectedSampleId, setSelectedSampleId] = useState(null);
   const [modalError, setModalError] = useState("");
   const [modalSuccess, setModalSuccess] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // New state for dropdown visibility
-
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
+  const token = localStorage.getItem("access_token");
+
+  // 🔹 Fetch samples for HOD
+  useEffect(() => {
+    const fetchSamples = async () => {
+      try {
+        const res = await fetch("http://192.168.1.180:8000/api/hod/samples/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch samples.");
+        const data = await res.json();
+        setPendingSamples(data.samples || []);
+      } catch (err) {
+        console.error("Error loading HOD samples:", err);
+      }
+    };
+    if (token) fetchSamples();
+  }, [token]);
+
+  // 🔹 Assign/Reassign modal
   const handleAssignTechnician = (sampleId) => {
     setSelectedSampleId(sampleId);
     setSelectedCategory("");
     setShowModal(true);
     setModalError("");
     setModalSuccess("");
-    setIsDropdownOpen(false); // Ensure dropdown is closed when modal opens
+    setIsDropdownOpen(false);
   };
 
   const handleModalSubmit = (e) => {
@@ -73,23 +63,24 @@ const HeadOfDepartmentDashboard = () => {
       return;
     }
 
+    // 🔹 Simulate assignment (you will later connect this with backend API)
     setPendingSamples(prev =>
       prev.map(sample => {
         if (sample.id === selectedSampleId) {
-          const existing = sample.assigned_to_technician;
+          const existing = sample.assigned_to_technician || [];
           const newAssignments = technicianIds
             .filter(id => !existing.some(t => t.id === id && t.category === selectedCategory))
             .map(id => ({
               id,
               username: technicians.find(t => t.id === id).username,
-              category: selectedCategory
+              category: selectedCategory,
             }));
 
           return {
             ...sample,
             tests: [
               ...sample.tests,
-              { category: selectedCategory, ingredient: { name: "TBD" } }
+              { category: selectedCategory, ingredient: { name: "TBD" } },
             ],
             assigned_to_technician: [...existing, ...newAssignments],
             status: "In Progress",
@@ -121,7 +112,7 @@ const HeadOfDepartmentDashboard = () => {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setIsDropdownOpen(false); // Close dropdown after selection
+    setIsDropdownOpen(false);
   };
 
   const toggleDropdown = (e) => {
@@ -138,11 +129,10 @@ const HeadOfDepartmentDashboard = () => {
   const filteredSamples = pendingSamples.filter(s => {
     const q = search.trim().toLowerCase();
     const matchSearch = q
-      ? s.sample_details.toLowerCase().includes(q) ||
-        s.tests.some(t => t.ingredient?.name.toLowerCase().includes(q)) ||
-        s.assigned_to_technician.some(t => t.username.toLowerCase().includes(q))
+      ? s.sample_details?.toLowerCase().includes(q) ||
+        (s.tests || []).some(t => t.ingredient?.name?.toLowerCase().includes(q))
       : true;
-    const matchStatus = statusFilter === "All" ? true : s.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchStatus = statusFilter === "All" ? true : s.status?.toLowerCase() === statusFilter.toLowerCase();
     return matchSearch && matchStatus;
   });
 
@@ -155,12 +145,12 @@ const HeadOfDepartmentDashboard = () => {
       ]}
     >
       <div className="hod-dashboard-container">
-        <h2>Manage Team Assignments (Example Data)</h2>
+        <h2>Head of Department – Manage Samples</h2>
 
         <div className="filter-row">
           <input
             type="text"
-            placeholder="Search by technician, sample or test"
+            placeholder="Search by sample, test, or technician"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -168,6 +158,7 @@ const HeadOfDepartmentDashboard = () => {
             <option>All</option>
             <option>In Progress</option>
             <option>Completed</option>
+            <option>Submitted to HOD</option>
           </select>
         </div>
 
@@ -175,46 +166,52 @@ const HeadOfDepartmentDashboard = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Technicians</th>
+              <th>Customer</th>
               <th>Sample</th>
               <th>Tests</th>
+              <th>Payment</th>
               <th>Control No.</th>
-              <th>Assigned Date</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredSamples.map(s => (
-              <tr key={s.id}>
-                <td>{s.id}</td>
-                <td>
-                  {s.assigned_to_technician.length > 0 ? (
-                    s.assigned_to_technician.map(t => (
-                      <span key={`${t.id}-${t.category}`} className="tech-badge">
-                        {t.username} ({t.category})
-                      </span>
-                    ))
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{s.sample_details}</td>
-                <td>
-                  {s.tests.length > 0
-                    ? s.tests.map((t, i) => (
-                        <span key={i}>{t.ingredient?.name} ({t.category}) </span>
-                      ))
-                    : "N/A"}
-                </td>
-                <td>{s.control_number}</td>
-                <td>{formatDate(s.assigned_date)}</td>
-                <td>{s.status}</td>
-                <td>
-                  <button onClick={() => handleAssignTechnician(s.id)}>Assign/Reassign</button>
+            {filteredSamples.length > 0 ? (
+              filteredSamples.map(s => (
+                <tr key={s.id}>
+                  <td>{s.id}</td>
+                  <td>
+                    {s.customer
+                      ? `${s.customer.first_name} ${s.customer.last_name}`
+                      : "—"}
+                  </td>
+                  <td>{s.sample_details}</td>
+                  <td>
+                    {(s.tests || []).length > 0
+                      ? s.tests.map((t, i) => (
+                          <span key={i}>
+                            {t.ingredient?.name} ({t.ingredient?.test_type})
+                          </span>
+                        ))
+                      : "N/A"}
+                  </td>
+                  <td>{s.payment ? `${s.payment.amount_due} TZS` : "—"}</td>
+                  <td>{s.control_number}</td>
+                  <td>{s.status}</td>
+                  <td>
+                    <button onClick={() => handleAssignTechnician(s.id)}>
+                      Assign/Reassign
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" style={{ textAlign: "center", padding: "10px" }}>
+                  No samples available.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
 
@@ -225,24 +222,23 @@ const HeadOfDepartmentDashboard = () => {
               <form onSubmit={handleModalSubmit}>
                 <div className="form-group">
                   <label htmlFor="technician">Select Technician(s)</label>
-                  <select id="technician" name="technician" multiple size={3} required>
+                  <select id="technician" multiple size={3} required>
                     {technicians.map(tech => (
                       <option key={tech.id} value={tech.id}>{tech.username}</option>
                     ))}
                   </select>
-                  <small>Select one or more technicians (Ctrl/Command + Click)</small>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="category">Select Test Category</label>
+                  <label>Select Test Category</label>
                   <div className="custom-dropdown">
                     <button className="dropdown-toggle" onClick={toggleDropdown}>
                       {selectedCategory || "Select Category"} <span className="dropdown-arrow"></span>
                     </button>
-                    {isDropdownOpen && ( // Conditionally render the dropdown menu
+                    {isDropdownOpen && (
                       <div className="dropdown-menu">
-              <div className="dropdown-item-style" onClick={() => handleCategorySelect("Chemistry")}>Chemistry</div>
-              <div className="dropdown-item-style" onClick={() => handleCategorySelect("Microbiology")}>Microbiology</div>
+                        <div className="dropdown-item-style" onClick={() => handleCategorySelect("Chemistry")}>Chemistry</div>
+                        <div className="dropdown-item-style" onClick={() => handleCategorySelect("Microbiology")}>Microbiology</div>
                       </div>
                     )}
                   </div>
