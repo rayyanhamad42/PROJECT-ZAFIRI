@@ -87,7 +87,7 @@ body {
     background-color: #f4f7f9;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: auto;
 }
 
 /* Header */
@@ -291,17 +291,14 @@ body {
 
 /* Footer */
 .footer {
-   background: #1ca3de;   /* blue background */
+  background: #1ca3de;
   text-align: center;
-  padding: 15px;
-  border-top: 1px solid #ddd;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  color: white;  /* text iwe nyeupe ionekane vizuri */
+  padding: 10px;
+  color: white;
   font-size: 14px;
+  margin-top: auto; /* Pushes the footer to the bottom of the flex container */
 }
+
 
 
 

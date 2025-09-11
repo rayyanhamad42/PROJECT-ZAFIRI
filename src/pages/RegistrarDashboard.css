@@ -1,3 +1,4 @@
+
 :root {
   --primary-color: #1CA3DE;
   --primary-dark: #0f86b8;
@@ -189,6 +190,11 @@ html {
   gap: 20px;
 }
 
+/* New rule to make a form field span the entire grid column */
+.form-grid .full-width-field {
+  grid-column: 1 / -1;
+}
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -362,140 +368,15 @@ html {
   font-weight: 500;
 }
 
-
 .sample-inputs-group {
-  display: flex; /* Use flexbox for horizontal layout */
-  gap: 15px; /* Space between input and textarea */
-  margin-bottom: 20px; /* Space below this group */
-}
-
-.sample-inputs-group input,
-.sample-inputs-group textarea {
-  flex: 1; /* Each item takes equal space */
-  margin-bottom: 0; /* Remove default bottom margin if any */
-}
-
-.sample-inputs-group textarea {
-  min-height: 50px; /* Ensure textarea has a decent initial height */
-  resize: vertical; /* Allow vertical resizing only */
-}
-
-/* You might want to adjust the existing .sample-box styles as well, for better spacing */
-.sample-box > .react-select-container { /* Target the Select components directly */
-  margin-bottom: 15px; /* Add space below each select */
-}
-
-/* Adjust general input/textarea styling if needed for consistency */
-.form-group input,
-.form-group textarea,
-.sample-box input, /* Include these for general styling within sample-box */
-.sample-box textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.sample-box input:focus,
-.sample-box textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
-}
-
-/* Updated button styling for "Add Another Sample" */
-.add-sample-btn {
-  background-color: #6c757d; /* A more subdued color for secondary action */
-  color: var(--background-white);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s, transform 0.2s;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 15px; /* Space above the button */
-}
-
-.add-sample-btn:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-/* Add these new rules to your CSS file */
-
-/* Grid for form inputs */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px; /* Space between grid items */
-}
-
-/* Update the .phone-input rule with this new CSS rule */
-.phone-country-select {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.phone-country-select select {
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--background-white);
-  font-size: 1rem;
-  -webkit-appearance: none; /* Removes default dropdown arrow in Webkit browsers */
-  -moz-appearance: none; /* Removes default dropdown arrow in Firefox */
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c757d' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  flex: 0 0 160px; /* Fixed width for the select dropdown */
-}
-
-.phone-country-select select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
-}
-
-.phone-country-select .phone-number {
-  flex-grow: 1; /* Makes the number input fill the remaining space */
-}
-
-/* Ensure consistent styling for form-groups */
-.form-group {
-    margin-bottom: 20px;
-}
-/* Checkbox styling */
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Space between label and checkbox */
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: auto; /* Override default width for checkboxes */
-    height: 20px;
-}
-
-/* ⚠️ IMPORTANT: Update the sample-inputs-group to use form-group classes */
-.sample-inputs-group {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .sample-inputs-group .form-group {
-    flex: 1; /* Makes each form-group take equal space */
-    margin-bottom: 0; /* Remove default margin from the form-group inside the flex container */
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .sample-inputs-group .form-group textarea {
@@ -503,13 +384,12 @@ html {
   resize: vertical;
 }
 
-/* Add labels to select elements for better accessibility and style */
 .sample-box label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--text-dark);
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
 }
 
 /* --- Modal --- */
@@ -525,10 +405,10 @@ html {
   align-items: center;
   z-index: 200;
 }
-/* Modal Content Theme */
+
 .modal-content {
-  background-color: #ffffff; /* clean white background */
-  border-left: 6px solid #1CA3DE; /* highlight with theme color */
+  background-color: #ffffff;
+  border-left: 6px solid #1CA3DE;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
@@ -548,9 +428,8 @@ html {
   transition: all 0.2s ease;
 }
 
-
 .modal-actions .submit-btn:hover {
-  background-color: #1690b8; /* slightly darker on hover */
+  background-color: #1690b8;
 }
 
 .modal-actions .add-sample-btn {
@@ -562,7 +441,6 @@ html {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 
 .modal-actions .add-sample-btn:hover {
   background-color: #e0e0e0;
@@ -583,11 +461,8 @@ html {
   justify-content: center;
   gap: 15px;
 }
-/* =======================
-   Dashboard Stat Cards (fixed visibility)
-   ======================= */
 
-/* Grid wrapper */
+/* --- Dashboard Stat Cards --- */
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -595,66 +470,134 @@ html {
   margin: 20px 0;
 }
 
-/* Card base - use explicit white background and dark text to avoid inheritance issues */
 .dashboard-content .stats-cards .stat-card {
-  background: #ffffff;                 /* white card */
+  background: #ffffff;
   border-radius: 12px;
   padding: 18px 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  color: #083244;                      /* explicit text color for safety */
+  color: #083244;
   min-height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* Card heading (small label) */
 .dashboard-content .stats-cards .stat-card h3 {
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 700;
-  color: #0b3b4a;                      /* dark blue for label */
+  color: #0b3b4a;
   letter-spacing: 0.2px;
 }
 
-/* Card value (large number) */
 .dashboard-content .stats-cards .stat-card p {
   margin: 0;
   font-size: 28px;
   font-weight: 800;
-  color: #022233;                      /* very dark for contrast */
+  color: #022233;
   line-height: 1;
 }
 
-/* Optional small description (if you add) */
 .dashboard-content .stats-cards .stat-card .muted {
   font-size: 12px;
   color: #5a6b72;
   margin-top: 6px;
 }
 
-/* Colored left accent bars */
 .dashboard-content .stats-cards .stat-card.approved {
-  border-left: 6px solid #28a745;     /* green */
-}
-.dashboard-content .stats-cards .stat-card.pending {
-  border-left: 6px solid #ffc107;     /* yellow */
-}
-.dashboard-content .stats-cards .stat-card.total {
-  border-left: 6px solid #1ca3de;     /* your primary blue */
+  border-left: 6px solid #28a745;
 }
 
-/* Hover effect */
+.dashboard-content .stats-cards .stat-card.pending {
+  border-left: 6px solid #ffc107;
+}
+
+.dashboard-content .stats-cards .stat-card.total {
+  border-left: 6px solid #1ca3de;
+}
+
 .dashboard-content .stats-cards .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
-/* Responsive tweak: stack nicely on narrow screens */
 @media (max-width: 600px) {
   .dashboard-content .stats-cards {
     grid-template-columns: 1fr;
+  }
+}
+
+/* --- Phone Number Compacted Design --- */
+.phone-country-select {
+  display: grid;
+  /* This tells the container to create two columns.
+     The first column (min-content) will be just wide enough for the country code.
+     The second column (1fr) will take up all the rest of the available space. */
+  grid-template-columns: min-content 1fr;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--background-white);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.country-code-select {
+  padding: 12px;
+  border: none; /* We remove the border here */
+  border-right: 1px solid var(--border-color); /* And add a separator on the right */
+  background-color: var(--background-white);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23333' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  /* Setting a consistent height to prevent the number input from getting too tall */
+  height: 48px;
+}
+
+.phone-number-input {
+  padding: 12px;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+  /* Setting a consistent height */
+  height: 48px;
+}
+
+/* Ensure focus-within is applied to the main container */
+.phone-country-select:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
+}
+
+.phone-country-select select:focus,
+.phone-number-input:focus {
+  outline: none;
+}
+/* Your media query for small screens remains the same and is still necessary. */
+@media (max-width: 600px) {
+  .phone-country-select {
+    grid-template-columns: 1fr;
+    border-radius: 8px;
+  }
+
+  .country-code-select,
+  .phone-number-input {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .country-code-select {
+    border-bottom: none;
+    border-right: none;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .phone-number-input {
+    border-radius: 0 0 8px 8px;
   }
 }

@@ -1,4 +1,3 @@
-// src/pages/RegistrarDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -11,7 +10,7 @@ import {
 } from "react-icons/fa";
 import Select from "react-select";
 import Layout from "../components/Layout";
-import ClaimSubmission from "./ClaimSubmission"; // ClaimSubmissions component (mock + styles)
+import ClaimSubmission from "./ClaimSubmission"; // ClaimSubmissions component now uses parent state
 import "./RegistrarDashboard.css";
 
 export default function RegistrarDashboard() {
@@ -20,7 +19,7 @@ export default function RegistrarDashboard() {
 
   const [registrarName] = useState(localStorage.getItem("username") || "Registrar");
 
-  // Customer fields
+  // Customer fields (unchanged)
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -59,10 +58,54 @@ export default function RegistrarDashboard() {
     },
   ]);
 
-  // Claim feature (kept for compatibility if you later use it here)
-  const [unclaimedSamples, setUnclaimedSamples] = useState([]);
-
   const MARKING_FEE = 10000.0;
+
+  // --- MOCK fallback data for UI (used only if backend returns none) ---
+  const MOCK_UNCLAIMED = [
+    {
+      id: 1,
+      customer: {
+        first_name: "John",
+        middle_name: "M.",
+        last_name: "Doe",
+        phone_country_code: "+255",
+        phone_number: "712345678",
+        email: "john@example.com",
+        country: "Tanzania",
+        region: "Zanzibar",
+        street: "Stone Town",
+        is_organization: false,
+        national_id: "123456789",
+        organization_name: "",
+        organization_id: "",
+      },
+      sample_details: "Water Quality Test",
+      payment: { amount_due: 50000, status: "pending" }, // lowercase for safety
+    },
+    {
+      id: 2,
+      customer: {
+        first_name: "Aisha",
+        middle_name: "",
+        last_name: "Hassan",
+        phone_country_code: "+255",
+        phone_number: "765432198",
+        email: "aisha@example.com",
+        country: "Tanzania",
+        region: "Pemba",
+        street: "Chake Chake",
+        is_organization: true,
+        national_id: "",
+        organization_name: "Blue Ocean Org",
+        organization_id: "ORG12345",
+      },
+      sample_details: "Fish Species Analysis",
+      payment: { amount_due: 75000, status: "approved" },
+    },
+  ];
+
+  // IMPORTANT: keep parent state for unclaimedSamples here and pass into ClaimSubmission
+  const [unclaimedSamples, setUnclaimedSamples] = useState(MOCK_UNCLAIMED);
 
   const menuItems = [
     { name: "Dashboard", path: "/registrar-dashboard", icon: <FaTachometerAlt /> },
@@ -99,21 +142,34 @@ export default function RegistrarDashboard() {
           setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
         }
 
-        // Load Unclaimed Submissions (kept but ClaimSubmission uses its own mock for UI)
+        // Load Unclaimed Submissions
         const claimRes = await fetch("http://192.168.1.180:8000/api/unclaimed-samples/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (claimRes.ok) {
           const claimData = await claimRes.json();
-          setUnclaimedSamples(claimData || []);
+          // only replace mock data if API returns something non-empty
+          if (Array.isArray(claimData) && claimData.length > 0) {
+            // normalize status to lowercase to avoid capitalization mismatches
+            const normalized = claimData.map((c) => ({
+              ...c,
+              payment: {
+                ...(c.payment || {}),
+                status: (c.payment?.status || "pending").toString().toLowerCase(),
+              },
+            }));
+            setUnclaimedSamples(normalized);
+          } // else keep the mock data so UI remains visible for design testing
         }
       } catch (err) {
         setError("Failed to load data.");
+        // keep MOCK_UNCLAIMED so UI still shows
       }
     };
     fetchData();
   }, [token]);
 
+  // rest of your functions unchanged (handleSampleChange, handleSelectChange, addNewSample, calculateTotalPrice, handleSubmit, etc.)
   const handleSampleChange = (index, field, value) => {
     const updated = [...samplesToAdd];
     updated[index][field] = value;
@@ -198,17 +254,29 @@ export default function RegistrarDashboard() {
     };
 
     try {
-      const response = await fetch("http://192.168.1.180:8000/api/registrar/register-sample/", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        "http://192.168.1.180:8000/api/registrar/register-sample/", // ✅ correct endpoint
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
-      if (!response.ok) throw new Error("Submission failed.");
+      const data = await response.json();
 
-      alert("Samples submitted successfully! Registrar has registered the customer & sample.");
+      if (!response.ok || !data.success) {
+        setError(data.message || "Submission failed.");
+        setLoading(false);
+        return;
+      }
 
-      // Clear form fields
+      alert(data.message || "Samples submitted successfully! Registrar has registered the customer & sample.");
+
+      // Clear form
       setFirstName("");
       setMiddleName("");
       setLastName("");
@@ -223,7 +291,12 @@ export default function RegistrarDashboard() {
       setOrganizationId("");
       setSelectedCountry(countryOptions[0]);
       setSamplesToAdd([
-        { sample_name: "", sample_details: "", selected_micro_ingredients: [], selected_chem_ingredients: [] },
+        {
+          sample_name: "",
+          sample_details: "",
+          selected_micro_ingredients: [],
+          selected_chem_ingredients: [],
+        },
       ]);
     } catch (err) {
       setError("Failed to submit. Try again.");
@@ -257,19 +330,67 @@ export default function RegistrarDashboard() {
                   <div className="form-group"><label>First Name</label><input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></div>
                   <div className="form-group"><label>Middle Name</label><input value={middleName} onChange={(e) => setMiddleName(e.target.value)} /></div>
                   <div className="form-group"><label>Last Name</label><input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></div>
-                  <div className="form-group"><label>Phone Number</label>
-                    <div className="phone-country-select">
-                      <select value={selectedCountry.name} onChange={(e) => setSelectedCountry(countryOptions.find(c => c.name === e.target.value))}>
-                        {countryOptions.map((country) => (
-                          <option key={country.code} value={country.name}>{country.flag} {country.name} ({country.code})</option>
-                        ))}
-                      </select>
-                      <input className="phone-number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
-                    </div>
+                  <div className="form-group full-width-field">
+    <label>Phone Number</label>
+    <div className="phone-country-select">
+      <select
+        value={selectedCountry.name}
+        onChange={(e) => setSelectedCountry(countryOptions.find(c => c.name === e.target.value))}
+        className="country-code-select"
+      >
+        {countryOptions.map((country) => (
+          <option key={country.code} value={country.name}>
+            {country.flag} {country.name} ({country.code})
+          </option>
+        ))}
+      </select>
+      <input
+        className="phone-number-input"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        required
+        placeholder="Enter phone number"
+      />
+    </div>
+  </div>
+
+
+  <div className="form-group full-width-field">
+    <label>Email</label>
+    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+  </div>
+
+                  <div className="form-group">
+                    <label>Country</label>
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      required
+                    >
+                      <option value="">-- Select Country --</option>
+                      <option value="Tanzania">Tanzania</option>
+                      <option value="Kenya">Kenya</option>
+                      <option value="Uganda">Uganda</option>
+                      <option value="Rwanda">Rwanda</option>
+                      <option value="Burundi">Burundi</option>
+                    </select>
                   </div>
-                  <div className="form-group"><label>Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-                  <div className="form-group"><label>Country</label><input value={country} onChange={(e) => setCountry(e.target.value)} required /></div>
-                  <div className="form-group"><label>Region</label><input value={region} onChange={(e) => setRegion(e.target.value)} required /></div>
+                  <div className="form-group">
+                    <label>Region</label>
+                    <select
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      required
+                    >
+                      <option value="">-- Select Region --</option>
+                      <option value="Zanzibar">Zanzibar</option>
+                      <option value="Dar es Salaam">Dar es Salaam</option>
+                      <option value="Arusha">Arusha</option>
+                      <option value="Dodoma">Dodoma</option>
+                      <option value="Mwanza">Mwanza</option>
+                      <option value="Pemba">Pemba</option>
+                    </select>
+                  </div>
                   <div className="form-group"><label>Street</label><input value={street} onChange={(e) => setStreet(e.target.value)} required /></div>
                   <div className="form-group checkbox-group"><label>Is Organization?</label><input type="checkbox" checked={isOrganization} onChange={(e) => setIsOrganization(e.target.checked)} /></div>
                   {!isOrganization ? (
@@ -292,10 +413,8 @@ export default function RegistrarDashboard() {
                       <div className="form-group"><label>Sample Name</label><input value={sample.sample_name} onChange={(e) => handleSampleChange(index, "sample_name", e.target.value)} required /></div>
                       <div className="form-group"><label>Sample Details</label><textarea value={sample.sample_details} onChange={(e) => handleSampleChange(index, "sample_details", e.target.value)} required /></div>
                     </div>
-                    
                     <label>Microbiology Tests</label>
                     <Select isMulti options={microOptions} value={microOptions.filter((opt) => sample.selected_micro_ingredients.includes(opt.value))} onChange={(sel) => handleSelectChange(index, sel, "microbiology")} />
-                    
                     <label>Chemistry Tests</label>
                     <Select isMulti options={chemOptions} value={chemOptions.filter((opt) => sample.selected_chem_ingredients.includes(opt.value))} onChange={(sel) => handleSelectChange(index, sel, "chemistry")} />
                   </div>
@@ -308,18 +427,19 @@ export default function RegistrarDashboard() {
             </form>
           </section>
         )}
-        {/* Claim Submissions - only visible when activeTab is claim-submissions */}
+
+        {/* Claim Submissions - stats + table only visible when activeTab is claim-submissions */}
         {activeTab === "claim-submissions" && (
           <>
             {/* Stats Cards */}
             <div className="stats-cards">
               <div className="stat-card approved">
                 <h3>Approved</h3>
-                <p>{unclaimedSamples.filter(s => s.payment?.status === "approved").length}</p>
+                <p>{unclaimedSamples.filter(s => (s.payment?.status || "").toLowerCase() === "approved").length}</p>
               </div>
               <div className="stat-card pending">
                 <h3>Pending</h3>
-                <p>{unclaimedSamples.filter(s => s.payment?.status === "pending").length}</p>
+                <p>{unclaimedSamples.filter(s => (s.payment?.status || "").toLowerCase() === "pending").length}</p>
               </div>
               <div className="stat-card total">
                 <h3>Total</h3>
@@ -327,11 +447,10 @@ export default function RegistrarDashboard() {
               </div>
             </div>
 
-            {/* Claim Submission table/list */}
-            <ClaimSubmission />
+            {/* Pass parent state into ClaimSubmission so updates reflect in the cards */}
+            <ClaimSubmission unclaimedSamples={unclaimedSamples} setUnclaimedSamples={setUnclaimedSamples} />
           </>
         )}
-
 
         {/* Verify Payment */}
         {activeTab === "verify-payment" && (

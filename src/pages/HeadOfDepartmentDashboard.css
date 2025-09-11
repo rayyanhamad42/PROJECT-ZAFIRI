@@ -1,95 +1,132 @@
+
 .hod-dashboard-container {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  padding: 40px;
+  background-color: var(--background-grey);
+  min-height: 100vh;
+}
+
+.hod-dashboard-container h2 {
+  color: var(--primary-dark);
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 20px;
-  font-family: Arial, sans-serif;
+  margin-bottom: 30px;
 }
 
-h2 {
-  color: #1ca3de;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.stat-card {
+  background: var(--background-white);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--box-shadow-light);
+  transition: transform 0.3s ease;
 }
 
-.filter-row {
-  display: flex;
-  gap: 10px;
+.stat-card h3 {
+  color: var(--text-dark);
+  font-size: 1.1rem;
   margin-bottom: 10px;
 }
 
-.filter-row input[type="text"] {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.stat-card p {
+  color: var(--primary-dark);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
 }
 
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card.approved { border-left: 6px solid var(--success-color); }
+.stat-card.pending { border-left: 6px solid #ffc107; }
+.stat-card.total { border-left: 6px solid var(--primary-color); }
+
+.filter-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.filter-row input,
 .filter-row select {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.filter-row input {
+  flex-grow: 1;
 }
 
 .assignment-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
+  background: var(--background-white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-light);
 }
 
 .assignment-table th,
 .assignment-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  font-size: 0.85em;
+  padding: 15px;
   text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .assignment-table th {
-  background-color: #1ca3de;
-  color: #fff;
+  background-color: var(--primary-color);
+  color: var(--background-white);
+  font-weight: 600;
 }
 
 .assignment-table td {
-  background-color: #f8f9fa;
+  color: var(--text-dark);
 }
 
-.assignment-table tr:hover {
-  background-color: #e0f7ff;
+.view-btn,
+button {
+  padding: 8px 15px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-btn {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 button {
-  cursor: pointer;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  background-color: #1ca3de;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: background 0.2s;
+  background-color: var(--primary-color);
+  color: var(--background-white);
+}
+
+.view-btn:hover {
+  background-color: #c3e6ff;
 }
 
 button:hover {
-  background-color: #1688b8;
+  background-color: var(--primary-dark);
 }
 
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -97,164 +134,156 @@ button:disabled {
 }
 
 .modal {
-  background: #fff;
+  background: var(--background-white);
   padding: 20px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: var(--box-shadow-heavy);
+  position: relative;
 }
 
 .modal h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #1ca3de;
+  color: var(--primary-dark);
+  margin-bottom: 20px;
 }
 
-.modal .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+.form-group {
+  margin-bottom: 15px;
 }
 
-.modal label {
+.form-group label {
+  display: block;
   margin-bottom: 5px;
-  font-weight: 600;
-  font-size: 0.85em;
+  color: var(--text-dark);
+  font-weight: 500;
 }
 
-.modal select {
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 0.9em;
-  color: #333;
-  background-color: #fff;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: 1px solid #ccc;
-  outline: none;
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
 }
 
-.modal select option {
-  padding: 6px 10px;
-  background-color: #fff;
-  color: #333;
+.form-section {
+  margin-bottom: 20px;
 }
 
-.modal select option:checked {
-  background-color: #1ca3de;
-  color: #fff;
+.form-section h4 {
+  color: var(--primary-dark);
+  margin-bottom: 10px;
 }
 
-.modal small {
-  font-size: 0.75em;
-  color: #555;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.form-group p {
+  margin: 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.details-modal {
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.test-section {
+  margin-bottom: 15px;
+}
+
+.test-section h5 {
+  color: var(--primary-dark);
+  margin-bottom: 5px;
+}
+
+.test-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.test-section li {
+  padding: 5px 0;
+  color: var(--text-dark);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 10px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
 }
 
 .error-text {
-  color: #d32f2f;
-  font-size: 0.8em;
-  margin-top: 5px;
+  color: var(--error-color);
+  margin-bottom: 10px;
 }
 
 .success-text {
-  color: #388e3c;
-  font-size: 0.8em;
-  margin-top: 5px;
+  color: var(--success-color);
+  margin-bottom: 10px;
 }
 
-.modal-actions button[type="button"] {
-  background-color: #f44336;
+.technician-select .react-select__control {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  min-height: 48px;
+  box-shadow: none;
+  transition: all 0.3s ease;
 }
 
-.modal-actions button[type="button"]:hover {
-  background-color: #d32f2f;
+.technician-select .react-select__control--is-focused {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
 }
 
-/* Technician badges */
-.tech-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  margin: 2px 2px 2px 0;
-  background-color: #1ca3de;
-  color: #fff;
-  border-radius: 12px;
-  font-size: 0.75em;
-  font-weight: 500;
+.technician-select .react-select__option {
+  padding: 12px 20px;
 }
 
-/* Fixed Dropdown Styling */
-.custom-dropdown {
-position: relative;
-width: 100%;
+.technician-select .react-select__option--is-selected {
+  background-color: var(--primary-color);
+  color: var(--background-white);
 }
 
-.dropdown-toggle {
-width: 100%;
-padding: 8px 12px;
-border: 1px solid #ccc;
-border-radius: 4px;
-background-color: #fff;
-cursor: pointer;
-text-align: left;
-display: flex;
-justify-content: space-between;
-align-items: center;
-font-size: 0.9em;
-color: #333;
-transition: all 0.2s ease-in-out;
+.technician-select .react-select__option--is-focused {
+  background-color: var(--primary-light);
+  color: var(--text-dark);
 }
 
-.dropdown-arrow {
-border: solid #555;
-border-width: 0 2px 2px 0;
-display: inline-block;
-padding: 3px;
-transform: rotate(45deg);
-transition: transform 0.2s ease-in-out;
+.technician-select .react-select__multi-value {
+  background-color: var(--primary-light);
+  border-radius: 4px;
+  margin: 2px;
 }
 
-/* Rotate arrow when dropdown is open */
-.dropdown-menu.active + .dropdown-arrow {
-transform: rotate(-135deg);
+.technician-select .react-select__multi-value__label {
+  color: var(--primary-dark);
 }
 
-.dropdown-menu {
-position: absolute;
-top: 100%;
-left: 0;
-width: 100%;
-max-height: 200px;
-overflow-y: auto;
-border: 1px solid #ccc;
-border-top: none;
-border-radius: 0 0 4px 4px;
-background-color: #fff;
-z-index: 100;
-box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-display: block;
+.technician-select .react-select__multi-value__remove {
+  color: var(--text-dark);
+  cursor: pointer;
 }
 
-.dropdown-item-style {
-padding: 10px 12px;
-cursor: pointer;
-font-size: 0.9em;
-transition: background-color 0.2s, color 0.2s;
-background-color: #fff; 
-color: #333; 
+.technician-select .react-select__multi-value__remove:hover {
+  color: var(--error-color);
 }
 
-.dropdown-item-style:hover,
-.dropdown-item-style.selected {
-background-color: #d32f2f;
-color: #fff; 
+.technician-select .react-select__control--is-disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.technician-select .react-select__placeholder {
+  color: var(--text-light);
 }
