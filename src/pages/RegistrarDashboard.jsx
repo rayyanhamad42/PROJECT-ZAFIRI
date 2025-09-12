@@ -32,6 +32,9 @@ export default function RegistrarDashboard() {
   const [nationalId, setNationalId] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [organizationId, setOrganizationId] = useState("");
+  // add new state fields at top with other useState
+const [dateReceived, setDateReceived] = useState("");
+const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
 
   const [modalSample, setModalSample] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -242,17 +245,18 @@ export default function RegistrarDashboard() {
         national_id: nationalId,
         organization_name: organizationName,
         organization_id: organizationId,
+        date_received: dateReceived,          // ✅ new
+    date_submitted_to_hod: dateSubmittedToHOD, // ✅ new
       },
       samples: samplesToAdd.map((s) => ({
-        sample_name: s.sample_name,
-        sample_details: s.sample_details,
-        selected_ingredients: [
-          ...s.selected_micro_ingredients,
-          ...s.selected_chem_ingredients,
-        ],
-      })),
-    };
-
+    sample_name: s.sample_name,
+    sample_details: s.sample_details,
+    selected_ingredients: [
+      ...s.selected_micro_ingredients,
+      ...s.selected_chem_ingredients,
+    ],
+  })),
+};
     try {
       const response = await fetch(
         "http://192.168.1.180:8000/api/registrar/register-sample/", // ✅ correct endpoint
@@ -314,6 +318,15 @@ export default function RegistrarDashboard() {
     label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
 
+  // Define regions by country
+const regionOptions = {
+  Tanzania: ["Zanzibar", "Dar es Salaam", "Arusha", "Dodoma", "Mwanza", "Pemba"],
+  Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"],
+  Uganda: ["Kampala", "Entebbe", "Gulu", "Mbarara"],
+  Rwanda: ["Kigali", "Butare", "Gisenyi", "Ruhengeri"],
+  Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
+};
+
   return (
     <Layout menuItems={menuItems}>
       <div className="dashboard-content">
@@ -327,6 +340,7 @@ export default function RegistrarDashboard() {
               <div className="form-section">
                 <h3>Customer Information</h3>
                 <div className="form-grid">
+  
                   <div className="form-group"><label>First Name</label><input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></div>
                   <div className="form-group"><label>Middle Name</label><input value={middleName} onChange={(e) => setMiddleName(e.target.value)} /></div>
                   <div className="form-group"><label>Last Name</label><input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></div>
@@ -360,37 +374,43 @@ export default function RegistrarDashboard() {
     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
   </div>
 
-                  <div className="form-group">
-                    <label>Country</label>
-                    <select
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      required
-                    >
-                      <option value="">-- Select Country --</option>
-                      <option value="Tanzania">Tanzania</option>
-                      <option value="Kenya">Kenya</option>
-                      <option value="Uganda">Uganda</option>
-                      <option value="Rwanda">Rwanda</option>
-                      <option value="Burundi">Burundi</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Region</label>
-                    <select
-                      value={region}
-                      onChange={(e) => setRegion(e.target.value)}
-                      required
-                    >
-                      <option value="">-- Select Region --</option>
-                      <option value="Zanzibar">Zanzibar</option>
-                      <option value="Dar es Salaam">Dar es Salaam</option>
-                      <option value="Arusha">Arusha</option>
-                      <option value="Dodoma">Dodoma</option>
-                      <option value="Mwanza">Mwanza</option>
-                      <option value="Pemba">Pemba</option>
-                    </select>
-                  </div>
+                <div className="form-group">
+  <label>Country</label>
+  <select
+    value={country}
+    onChange={(e) => {
+      setCountry(e.target.value);
+      setRegion(""); // reset region when country changes
+    }}
+    required
+  >
+    <option value="">-- Select Country --</option>
+    {Object.keys(regionOptions).map((c) => (
+      <option key={c} value={c}>
+        {c}
+      </option>
+    ))}
+  </select>
+</div>
+                 
+<div className="form-group">
+  <label>Region</label>
+  <select
+    value={region}
+    onChange={(e) => setRegion(e.target.value)}
+    required
+    disabled={!country} // disable until country is chosen
+  >
+    <option value="">-- Select Region --</option>
+    {country &&
+      regionOptions[country].map((r) => (
+        <option key={r} value={r}>
+          {r}
+        </option>
+      ))}
+  </select>
+</div>
+
                   <div className="form-group"><label>Street</label><input value={street} onChange={(e) => setStreet(e.target.value)} required /></div>
                   <div className="form-group checkbox-group"><label>Is Organization?</label><input type="checkbox" checked={isOrganization} onChange={(e) => setIsOrganization(e.target.checked)} /></div>
                   {!isOrganization ? (
@@ -400,8 +420,30 @@ export default function RegistrarDashboard() {
                       <div className="form-group"><label>Organization Name</label><input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required /></div>
                       <div className="form-group"><label>Organization ID</label><input value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} required /></div>
                     </>
+
                   )}
+                  <div className="form-group">
+  <label>Date Received from Customer</label>
+  <input
+    type="date"
+    value={dateReceived}
+    onChange={(e) => setDateReceived(e.target.value)}
+    required
+  />
+</div>
+
+<div className="form-group">
+  <label>Date Submitted to HOD</label>
+  <input
+    type="date"
+    value={dateSubmittedToHOD}
+    onChange={(e) => setDateSubmittedToHOD(e.target.value)}
+    required
+  />
+</div>
+
                 </div>
+
               </div>
 
               <div className="form-section">

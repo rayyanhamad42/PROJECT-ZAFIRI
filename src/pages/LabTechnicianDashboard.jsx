@@ -14,32 +14,32 @@ export default function LabTechnicianDashboard() {
 
   // Hii ndio sehemu ya muhimu: badilisha "fetchTests" kusoma kutoka localStorage
   const fetchTests = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const storedTests = JSON.parse(localStorage.getItem("assignedTests"));
+  setLoading(true);
+  setError("");
+  try {
+    const token = localStorage.getItem("access_token");
 
-      if (storedTests) {
-        setAssignedTests(storedTests);
-      } else {
-        // Hili linaweza kutokea mara ya kwanza mradi unapoendeshwa.
-        // Hifadhi data ya awali (mock data) kwenye localStorage
-        const mockData = {
-          tests: [
-            { id: 1, ingredient: { name: "Test A" }, status: "Pending", sample: { control_number: "C001", customer: { name: "Test" }, date_received: "2025-09-01" }, assigned_by_hod: { name: "HOD1" } },
-            { id: 2, ingredient: { name: "Test B" }, status: "In Progress", sample: { control_number: "C002", customer: { name: "Test" }, date_received: "2025-09-02" }, assigned_by_hod: { name: "HOD2" } },
-          ]
-        };
-        setAssignedTests(mockData.tests);
-        localStorage.setItem("assignedTests", JSON.stringify(mockData.tests));
-      }
-    } catch (err) {
-      setError("Failed to load assigned tests.");
-    } finally {
-      setLoading(false);
+    const res = await fetch("http://192.168.1.180:8000/api/technician/dashboard/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch assigned tests");
+
+    const data = await res.json();
+    console.log("Technician Dashboard API:", data);
+
+    if (data.success && Array.isArray(data.tests)) {
+      setAssignedTests(data.tests);
+    } else {
+      setAssignedTests([]);
     }
-  };
-
+  } catch (err) {
+    console.error("Error fetching technician tests:", err);
+    setError("Failed to load assigned tests.");
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     const storedUsername = localStorage.getItem("username") || "TechnicianUser";
     setUsername(storedUsername);

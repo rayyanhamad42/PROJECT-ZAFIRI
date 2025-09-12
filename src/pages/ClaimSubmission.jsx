@@ -10,13 +10,21 @@ export default function ClaimSubmission({ unclaimedSamples, setUnclaimedSamples 
   // Claim confirm handler — updates parent state and tries the API (if available)
   const confirmClaim = async (sample) => {
     // Optimistic update: set status to approved locally
-    setUnclaimedSamples((prev) =>
-      prev.map((s) =>
-        s.id === sample.id
-          ? { ...s, payment: { ...(s.payment || {}), status: "approved" } }
-          : s
-      )
-    );
+    const registrarUser = JSON.parse(localStorage.getItem("user")); 
+// assuming you save registrar user info in localStorage after login
+
+
+setUnclaimedSamples((prev) =>
+  prev.map((s) =>
+    s.id === sample.id
+      ? {
+          ...s,
+          payment: { ...(s.payment || {}), status: "approved" },
+          claimed_by: registrarUser,   // ✅ include registrar info
+        }
+      : s
+  )
+);
 
     setModalSample(null);
 
@@ -26,6 +34,7 @@ export default function ClaimSubmission({ unclaimedSamples, setUnclaimedSamples 
       const resp = await fetch(`http://192.168.1.180:8000/api/claim-sample/${sample.id}/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ claimed_by: registrarUser?.username }), 
       });
       // backend may return success or not — we already updated UI optimistically
       if (!resp.ok) {

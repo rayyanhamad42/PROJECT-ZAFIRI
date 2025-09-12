@@ -40,8 +40,6 @@ const HeadOfDepartmentDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  // const token = localStorage.getItem("access_token");
-
   // Mock ingredients for fallback
   const MOCK_INGREDIENTS = [
     { id: 1, name: "pH Test", test_type: "Chemistry", price: 5000 },
@@ -143,68 +141,58 @@ const HeadOfDepartmentDashboard = () => {
     setModalSuccess("");
   };
 
-  const handleModalSubmit = async (e) => {
-    e.preventDefault();
+const handleModalSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!selectedTechnician) {
-      setModalError("Please select a technician.");
-      return;
-    }
-    if (!selectedCategory) {
-      setModalError("Please select a test category.");
-      return;
-    }
+  if (!selectedTechnician) {
+    setModalError("Please select a technician.");
+    return;
+  }
 
-    // ✅ Get tests of this category for the selected sample
-    const selectedSample = samples.find((s) => s.id === selectedSampleId);
-    const testIds = (selectedSample?.tests || [])
-      .filter((t) => t.ingredient?.test_type === selectedCategory)
-      .map((t) => t.id);
+  const selectedSample = samples.find((s) => s.id === selectedSampleId);
+  const selectedTech = technicians.find(t => t.id === parseInt(selectedTechnician));
 
-    if (testIds.length === 0) {
-      setModalError(`No ${selectedCategory} tests available for this sample.`);
-      return;
-    }
+  const testIds = (selectedSample?.tests || [])
+    .filter((t) => t.ingredient?.test_type === selectedTech?.specialization)
+    .map((t) => t.id);
 
-    try {
-      const response = await fetch(
-        `http://192.168.1.180:8000/api/hod/assign-technician/${selectedSampleId}/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            technician_ids: [selectedTechnician], // Single technician ID
-            test_ids: testIds, // ✅ Sending test IDs
-          }),
-        }
-      );
+  if (testIds.length === 0) {
+    setModalError(`No ${selectedTech?.specialization || "N/A"} tests available for this sample.`);
+    return;
+  }
 
-      if (!response.ok) throw new Error("Failed to assign technician.");
-      const data = await response.json();
+  try {
+    const response = await fetch(
+      `http://192.168.1.180:8000/api/hod/assign-technician/${selectedSampleId}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          technician_ids: [selectedTechnician],
+          test_ids: testIds,
+        }),
+      }
+    );
 
-      // ✅ Update local state from backend response
-      setSamples((prev) =>
-        prev.map((s) => (s.id === selectedSampleId ? data.sample : s))
-      );
+    if (!response.ok) throw new Error("Failed to assign technician.");
+    const data = await response.json();
 
-      setModalSuccess("Technician assigned successfully!");
-      setTimeout(() => {
-        setShowModal(false);
-        setSelectedSampleId(null);
-        setSelectedCategory("");
-        setSelectedTechnician("");
-        setModalError("");
-        setModalSuccess("");
-      }, 1000);
-    } catch (err) {
-      console.error(err);
-      setModalError("Failed to assign technician. Try again.");
-    }
-  };
+    setSamples((prev) =>
+      prev.map((s) => (s.id === selectedSampleId ? data.sample : s))
+    );
 
+    setModalSuccess("Technician assigned successfully!");
+    setTimeout(() => {
+      setShowModal(false);
+    }, 1000);
+  } catch (err) {
+    console.error(err);
+    setModalError("Failed to assign technician. Try again.");
+  }
+};
   const handleModalClose = () => {
     setShowModal(false);
     setSelectedSampleId(null);
@@ -323,6 +311,7 @@ const HeadOfDepartmentDashboard = () => {
               <th>Customer Name</th>
               <th>Phone</th>
               <th>Sample Name</th>
+               <th>Claimed By</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -338,6 +327,7 @@ const HeadOfDepartmentDashboard = () => {
                     </td>
                     <td>{`${customer.phone_country_code}${customer.phone_number}`}</td>
                     <td>{s.sample_name || "—"}</td>
+                          <td>{s.claimed_by?.username || "—"}</td> {/* ✅ show registrar */}
                     <td>
                       <button onClick={() => handleViewDetails(s.id)} className="view-btn">
                         View Details
@@ -376,24 +366,9 @@ const HeadOfDepartmentDashboard = () => {
                     <option value="">Select Technician</option>
                     {technicians.map((tech) => (
                       <option key={tech.id} value={tech.id}>
-                        {tech.username}
+                        {`${tech.username} (Specialization: ${tech.specialization || "N/A"})`}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="category">Select Test Category</label>
-                  <select
-                    id="category"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    required
-                    className="form-group-select"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Microbiology">Microbiology</option>
                   </select>
                 </div>
 
@@ -492,6 +467,13 @@ const HeadOfDepartmentDashboard = () => {
                     <p>{selectedSampleForDetails.sample_details || "—"}</p>
                   </div>
                 </div>
+<div className="form-section">
+  <h4>Claim Information</h4>
+  <div className="form-group">
+    <label>Claimed By</label>
+    <p>{selectedSampleForDetails.claimed_by?.username || "—"}</p>
+  </div>
+</div>
 
                 <div className="form-section">
                   <h4>Payment Information</h4>
