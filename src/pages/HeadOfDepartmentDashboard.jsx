@@ -10,9 +10,8 @@ const HeadOfDepartmentDashboard = () => {
   const [chemIngredients, setChemIngredients] = useState([]);
   const [microIngredients, setMicroIngredients] = useState([]);
   
-  const token = localStorage.getItem("access_token");  // ✅ declare early
+  const token = localStorage.getItem("access_token");
 
-  // 🔹 Fetch technicians from backend
   useEffect(() => {
     const fetchTechnicians = async () => {
       if (!token) return;
@@ -29,6 +28,7 @@ const HeadOfDepartmentDashboard = () => {
     };
     fetchTechnicians();
   }, [token]);
+  
   const [showModal, setShowModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedSampleId, setSelectedSampleId] = useState(null);
@@ -40,18 +40,15 @@ const HeadOfDepartmentDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  // Mock ingredients for fallback
   const MOCK_INGREDIENTS = [
     { id: 1, name: "pH Test", test_type: "Chemistry", price: 5000 },
     { id: 2, name: "Bacteria Count", test_type: "Microbiology", price: 10000 },
   ];
 
-  // 🔹 Fetch data for HOD (samples and ingredients)
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
       try {
-        // Fetch Ingredients
         const ingRes = await fetch("http://192.168.1.180:8000/api/ingredients/", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,14 +60,12 @@ const HeadOfDepartmentDashboard = () => {
           setMicroIngredients(all.filter((ing) => ing.test_type === "Microbiology"));
         }
 
-        // Fetch Samples
         const res = await fetch("http://192.168.1.180:8000/api/hod/samples/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch samples.");
         const data = await res.json();
 
-        // Normalize response shape to match Registrar's unclaimedSamples structure
         let samplesData = [];
         if (Array.isArray(data)) {
           samplesData = data;
@@ -80,7 +75,6 @@ const HeadOfDepartmentDashboard = () => {
           samplesData = data.results;
         }
 
-        // Ensure status is lowercase for consistency
         const normalized = samplesData.map((sample) => ({
           ...sample,
           payment: {
@@ -95,7 +89,6 @@ const HeadOfDepartmentDashboard = () => {
         setSamples(normalized);
       } catch (err) {
         console.error("Error loading HOD data:", err);
-        // Mock data matching registrar's unclaimedSamples structure
         setIngredients(MOCK_INGREDIENTS);
         setChemIngredients(MOCK_INGREDIENTS.filter((ing) => ing.test_type === "Chemistry"));
         setMicroIngredients(MOCK_INGREDIENTS.filter((ing) => ing.test_type === "Microbiology"));
@@ -119,11 +112,12 @@ const HeadOfDepartmentDashboard = () => {
             },
             sample_name: "Water Sample",
             sample_details: "Water Quality Test",
-            selected_ingredients: [1], // Mock selected ingredients
+            selected_ingredients: [1],
             payment: { amount_due: 50000, status: "pending" },
             control_number: "CN12345",
             status: "Submitted to HOD",
             assigned_to_technician: [],
+            tests: [{ id: 1, result_data: "pH: 7.2", status: "Submitted" }],
           },
         ]);
       }
@@ -131,7 +125,6 @@ const HeadOfDepartmentDashboard = () => {
     fetchData();
   }, [token]);
 
-  // 🔹 Assign/Reassign modal
   const handleAssignTechnician = (sampleId) => {
     setSelectedSampleId(sampleId);
     setSelectedCategory("");
@@ -141,58 +134,59 @@ const HeadOfDepartmentDashboard = () => {
     setModalSuccess("");
   };
 
-const handleModalSubmit = async (e) => {
-  e.preventDefault();
+  const handleModalSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!selectedTechnician) {
-    setModalError("Please select a technician.");
-    return;
-  }
+    if (!selectedTechnician) {
+      setModalError("Please select a technician.");
+      return;
+    }
 
-  const selectedSample = samples.find((s) => s.id === selectedSampleId);
-  const selectedTech = technicians.find(t => t.id === parseInt(selectedTechnician));
+    const selectedSample = samples.find((s) => s.id === selectedSampleId);
+    const selectedTech = technicians.find(t => t.id === parseInt(selectedTechnician));
 
-  const testIds = (selectedSample?.tests || [])
-    .filter((t) => t.ingredient?.test_type === selectedTech?.specialization)
-    .map((t) => t.id);
+    const testIds = (selectedSample?.tests || [])
+      .filter((t) => t.ingredient?.test_type === selectedTech?.specialization)
+      .map((t) => t.id);
 
-  if (testIds.length === 0) {
-    setModalError(`No ${selectedTech?.specialization || "N/A"} tests available for this sample.`);
-    return;
-  }
+    if (testIds.length === 0) {
+      setModalError(`No ${selectedTech?.specialization || "N/A"} tests available for this sample.`);
+      return;
+    }
 
-  try {
-    const response = await fetch(
-      `http://192.168.1.180:8000/api/hod/assign-technician/${selectedSampleId}/`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          technician_ids: [selectedTechnician],
-          test_ids: testIds,
-        }),
-      }
-    );
+    try {
+      const response = await fetch(
+        `http://192.168.1.180:8000/api/hod/assign-technician/${selectedSampleId}/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            technician_ids: [selectedTechnician],
+            test_ids: testIds,
+          }),
+        }
+      );
 
-    if (!response.ok) throw new Error("Failed to assign technician.");
-    const data = await response.json();
+      if (!response.ok) throw new Error("Failed to assign technician.");
+      const data = await response.json();
 
-    setSamples((prev) =>
-      prev.map((s) => (s.id === selectedSampleId ? data.sample : s))
-    );
+      setSamples((prev) =>
+        prev.map((s) => (s.id === selectedSampleId ? data.sample : s))
+      );
 
-    setModalSuccess("Technician assigned successfully!");
-    setTimeout(() => {
-      setShowModal(false);
-    }, 1000);
-  } catch (err) {
-    console.error(err);
-    setModalError("Failed to assign technician. Try again.");
-  }
-};
+      setModalSuccess("Technician assigned successfully!");
+      setTimeout(() => {
+        setShowModal(false);
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      setModalError("Failed to assign technician. Try again.");
+    }
+  };
+
   const handleModalClose = () => {
     setShowModal(false);
     setSelectedSampleId(null);
@@ -211,6 +205,43 @@ const handleModalSubmit = async (e) => {
   const handleDetailsClose = () => {
     setShowDetailsModal(false);
     setSelectedSampleForDetails(null);
+  };
+
+  const handleRejectResult = async (testId) => {
+    try {
+      const response = await fetch(
+        `http://192.168.1.180:8000/api/hod/reject-result/${testId}/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "Pending" }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to reject result.");
+      const data = await response.json();
+
+      setSamples((prev) =>
+        prev.map((s) =>
+          s.id === selectedSampleForDetails.id
+            ? {
+                ...s,
+                tests: s.tests.map(t =>
+                  t.id === testId ? { ...t, status: "Pending" } : t
+                ),
+              }
+            : s
+        )
+      );
+      setModalSuccess("Result rejected successfully!");
+      setTimeout(() => setModalSuccess(""), 2000);
+    } catch (err) {
+      console.error(err);
+      setModalError("Failed to reject result. Try again.");
+    }
   };
 
   const filteredSamples = samples.filter((s) => {
@@ -246,6 +277,13 @@ const handleModalSubmit = async (e) => {
         {filtered.map((t) => (
           <li key={t.id}>
             {t.ingredient?.name} ({t.ingredient?.price} TZS)
+            {t.result_data && <p>Result: {t.result_data}</p>}
+            {t.status && <p>Status: {t.status}</p>}
+            {t.status === "Submitted" && (
+              <button onClick={() => handleRejectResult(t.id)} className="reject-btn">
+                Reject
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -263,7 +301,6 @@ const handleModalSubmit = async (e) => {
       <div className="hod-dashboard-container">
         <h2>Head of Department – Manage Samples</h2>
 
-        {/* Stats Cards */}
         <div className="stats-cards">
           <div className="stat-card approved">
             <h3>Approved</h3>
@@ -311,7 +348,8 @@ const handleModalSubmit = async (e) => {
               <th>Customer Name</th>
               <th>Phone</th>
               <th>Sample Name</th>
-               <th>Claimed By</th>
+              <th>Claimed By</th>
+              <th>Results Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -319,6 +357,13 @@ const handleModalSubmit = async (e) => {
             {filteredSamples.length > 0 ? (
               filteredSamples.map((s) => {
                 const customer = s.customer || {};
+                const resultStatus = s.tests?.length
+                  ? s.tests.every(t => t.status === "Pending")
+                    ? "Pending"
+                    : s.tests.every(t => t.status === "Submitted")
+                    ? "Submitted"
+                    : "Rejected"
+                  : "Pending";
                 return (
                   <tr key={s.id}>
                     <td>{s.id}</td>
@@ -327,7 +372,8 @@ const handleModalSubmit = async (e) => {
                     </td>
                     <td>{`${customer.phone_country_code}${customer.phone_number}`}</td>
                     <td>{s.sample_name || "—"}</td>
-                          <td>{s.claimed_by?.username || "—"}</td> {/* ✅ show registrar */}
+                    <td>{s.claimed_by?.username || "—"}</td>
+                    <td>{resultStatus}</td>
                     <td>
                       <button onClick={() => handleViewDetails(s.id)} className="view-btn">
                         View Details
@@ -341,7 +387,7 @@ const handleModalSubmit = async (e) => {
               })
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center", padding: "10px" }}>
+                <td colSpan="7" style={{ textAlign: "center", padding: "10px" }}>
                   No samples available.
                 </td>
               </tr>
@@ -349,7 +395,6 @@ const handleModalSubmit = async (e) => {
           </tbody>
         </table>
 
-        {/* Assign Modal */}
         {showModal && (
           <div className="modal-overlay">
             <div className="modal">
@@ -376,19 +421,16 @@ const handleModalSubmit = async (e) => {
                 {modalSuccess && <p className="success-text">{modalSuccess}</p>}
 
                 <div className="modal-actions">
-                  <>
-                    <button type="submit">Assign</button>
-                    <button type="button" onClick={handleModalClose}>
-                      Cancel
-                    </button>
-                  </>
+                  <button type="submit">Assign</button>
+                  <button type="button" onClick={handleModalClose}>
+                    Cancel
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* View Details Modal */}
         {showDetailsModal && selectedSampleForDetails && (
           <div className="modal-overlay">
             <div className="modal details-modal">
@@ -467,13 +509,16 @@ const handleModalSubmit = async (e) => {
                     <p>{selectedSampleForDetails.sample_details || "—"}</p>
                   </div>
                 </div>
-<div className="form-section">
-  <h4>Claim Information</h4>
-  <div className="form-group">
-    <label>Claimed By</label>
-    <p>{selectedSampleForDetails.claimed_by?.username || "—"}</p>
-  </div>
-</div>
+
+                {selectedSampleForDetails.status === "Claimed" && (
+                  <div className="form-section">
+                    <h4>Claim Information</h4>
+                    <div className="form-group">
+                      <label>Claimed By</label>
+                      <p>{selectedSampleForDetails.claimed_by?.username || "—"}</p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="form-section">
                   <h4>Payment Information</h4>

@@ -1,4 +1,3 @@
-// src/pages/LabTechnicianDashboard.js
 import React, { useEffect, useState } from "react";
 import { FaTachometerAlt, FaHistory, FaUser, FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Hakuna haja ya useLocation tena
@@ -14,32 +13,33 @@ export default function LabTechnicianDashboard() {
 
   // Hii ndio sehemu ya muhimu: badilisha "fetchTests" kusoma kutoka localStorage
   const fetchTests = async () => {
-  setLoading(true);
-  setError("");
-  try {
-    const token = localStorage.getItem("access_token");
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("access_token");
 
-    const res = await fetch("http://192.168.1.180:8000/api/technician/dashboard/", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const res = await fetch("http://192.168.1.180:8000/api/technician/dashboard/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (!res.ok) throw new Error("Failed to fetch assigned tests");
+      if (!res.ok) throw new Error("Failed to fetch assigned tests");
 
-    const data = await res.json();
-    console.log("Technician Dashboard API:", data);
+      const data = await res.json();
+      console.log("Technician Dashboard API:", data);
 
-    if (data.success && Array.isArray(data.tests)) {
-      setAssignedTests(data.tests);
-    } else {
-      setAssignedTests([]);
+      if (data.success && Array.isArray(data.tests)) {
+        setAssignedTests(data.tests);
+      } else {
+        setAssignedTests([]);
+      }
+    } catch (err) {
+      console.error("Error fetching technician tests:", err);
+      setError("Failed to load assigned tests.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Error fetching technician tests:", err);
-    setError("Failed to load assigned tests.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   useEffect(() => {
     const storedUsername = localStorage.getItem("username") || "TechnicianUser";
     setUsername(storedUsername);
@@ -63,7 +63,6 @@ export default function LabTechnicianDashboard() {
   return (
     <Layout menuItems={menuItems}>
       <div className="dashboard-content">
-
         <section className="stats-section">
           <div className="stat-card">
             <h3>Pending Tasks</h3>
@@ -91,7 +90,7 @@ export default function LabTechnicianDashboard() {
                 <thead>
                   <tr>
                     <th>Customer ID</th>
-                    <th>Sample Code </th>
+                    <th>Sample Code</th>
                     <th>Sample Details</th>
                     <th>Test Type</th>
                     <th>Assigned Date</th>
@@ -114,7 +113,18 @@ export default function LabTechnicianDashboard() {
                         <button
                           className={`action-btn ${test.status === "Completed" ? "completed-btn" : ""}`}
                           disabled={test.status === "Completed"}
-                          onClick={() => navigate(`/submit-result/${test.id}`)}
+                          onClick={() => navigate(`/submit-result/${test.id}`, {
+                            state: {
+                              sampleDetails: test.sample?.sample_details || "N/A",
+                              labNumber: test.sample?.id || "N/A",
+                              customerId: test.sample?.customer?.id || "N/A",
+                              assignedDate: test.sample?.date_received || "N/A",
+                              dateOfSubmission: new Date().toISOString().split('T')[0], // Current date: 2025-09-12
+                              sampleSubmittedBy: test.assigned_by_hod?.name || "N/A",
+                              laboratoryResults: test.result_data || "N/A",
+                              analysisRequest: test.sample?.sample_details || "N/A",
+                            }
+                          })}
                         >
                           <FaEdit /> {test.status === "Completed" ? "Submitted" : "Submit Result"}
                         </button>
