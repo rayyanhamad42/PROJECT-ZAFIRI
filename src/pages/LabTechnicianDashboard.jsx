@@ -18,7 +18,7 @@ export default function LabTechnicianDashboard() {
     try {
       const token = localStorage.getItem("access_token");
 
-      const res = await fetch("http://192.168.1.180:8000/api/technician/dashboard/", {
+      const res = await fetch("http://192.168.1.180:8000/api/dashboard/technician/", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -61,82 +61,97 @@ export default function LabTechnicianDashboard() {
   ];
 
   return (
-    <Layout menuItems={menuItems}>
-      <div className="dashboard-content">
-        <section className="stats-section">
-          <div className="stat-card">
-            <h3>Pending Tasks</h3>
-            <p className="stat-number">{stats.pending}</p>
-          </div>
-          <div className="stat-card">
-            <h3>In Progress</h3>
-            <p className="stat-number">{stats.inProgress}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Completed Tests</h3>
-            <p className="stat-number">{stats.completed}</p>
-          </div>
-        </section>
+  <Layout menuItems={menuItems}>
+    <div className="dashboard-content">
+      <section className="stats-section">
+        <div className="stat-card">
+          <h3>Pending Tasks</h3>
+          <p className="stat-number">{stats.pending}</p>
+        </div>
+        <div className="stat-card">
+          <h3>In Progress</h3>
+          <p className="stat-number">{stats.inProgress}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Completed Tests</h3>
+          <p className="stat-number">{stats.completed}</p>
+        </div>
+      </section>
 
-        <section className="tasks-section">
-          <h2 className="section-title">Assigned Tests</h2>
-          {loading ? (
-            <p>Loading...</p>
-          ) : error ? (
-            <p>{error}</p>
-          ) : (
-            <div className="table-container">
-              <table className="tasks-table">
-                <thead>
-                  <tr>
-                    <th>Customer ID</th>
-                    <th>Sample Code</th>
-                    <th>Sample Details</th>
-                    <th>Test Type</th>
-                    <th>Assigned Date</th>
-                    <th>Assigned By</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assignedTests.map(test => (
-                    <tr key={test.id}>
-                      <td>{test.id}</td>
-                      <td>{test.sample?.control_number || "N/A"}</td>
-                      <td>{test.sample?.customer?.name || "N/A"}</td>
-                      <td>{test.ingredient?.name || "N/A"}</td>
-                      <td>{test.sample?.date_received || "N/A"}</td>
-                      <td>{test.assigned_by_hod?.name || "N/A"}</td>
-                      <td>{test.status}</td>
-                      <td>
-                        <button
-                          className={`action-btn ${test.status === "Completed" ? "completed-btn" : ""}`}
-                          disabled={test.status === "Completed"}
-                          onClick={() => navigate(`/submit-result/${test.id}`, {
-                            state: {
-                              sampleDetails: test.sample?.sample_details || "N/A",
-                              labNumber: test.sample?.id || "N/A",
-                              customerId: test.sample?.customer?.id || "N/A",
-                              assignedDate: test.sample?.date_received || "N/A",
-                              dateOfSubmission: new Date().toISOString().split('T')[0], // Current date: 2025-09-12
-                              sampleSubmittedBy: test.assigned_by_hod?.name || "N/A",
-                              laboratoryResults: test.result_data || "N/A",
-                              analysisRequest: test.sample?.sample_details || "N/A",
-                            }
-                          })}
-                        >
-                          <FaEdit /> {test.status === "Completed" ? "Submitted" : "Submit Result"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </div>
-    </Layout>
-  );
+      <section className="tasks-section">
+        <h2 className="section-title">Assigned Tests</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p>{error}</p>
+        ) : (
+          <div className="table-container">
+            <table className="tasks-table">
+              <thead>
+                <tr>
+                  <th>Customer ID</th>
+                  <th>Sample Code</th>
+                  <th>Sample Details</th>
+                  <th>Test Type</th>
+                  <th>Assigned Date</th>
+                  <th>Assigned By</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+  {assignedTests.map(test => (
+    <tr key={test.id}>
+      {/* Show Customer ID instead of customer.name */}
+      <td>{test.sample?.customer?.id || "N/A"}</td>
+
+      {/* Sample Code from control_number */}
+      <td>{test.sample?.control_number || "N/A"}</td>
+
+      {/* Correct: Sample Details */}
+      <td>{test.sample?.sample_details || "N/A"}</td>
+
+      {/* Test Type */}
+      <td>{test.ingredient?.name || "N/A"}</td>
+
+      {/* Assigned Date */}
+      <td>{test.sample?.date_received || "N/A"}</td>
+
+      {/* Assigned By HOD */}
+      <td>{test.assigned_by_hod?.name || "N/A"}</td>
+
+      {/* Status */}
+      <td>{test.status}</td>
+
+      {/* Actions */}
+      <td>
+        <button
+          className={`action-btn ${test.status === "Completed" ? "completed-btn" : ""}`}
+          disabled={test.status === "Completed"}
+          onClick={() => navigate(`/submit-result/${test.id}`, {
+            state: {
+              sampleDetails: test.sample?.sample_details || "N/A",
+              labNumber: test.sample?.id || "N/A",
+              customerId: test.sample?.customer?.id || "N/A",
+              assignedDate: test.sample?.date_received || "N/A",
+              dateOfSubmission: new Date().toISOString().split('T')[0],
+              sampleSubmittedBy: test.assigned_by_hod?.name || "N/A",
+              laboratoryResults: test.result_data || "",
+              analysisRequest: test.sample?.sample_details || "N/A",
+            }
+          })}
+        >
+          <FaEdit /> {test.status === "Completed" ? "Submitted" : "Submit Result"}
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </div>
+  </Layout>
+);
 }

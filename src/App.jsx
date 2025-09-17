@@ -20,7 +20,7 @@ import AddIngredients from './pages/AddIngredients';
 
 import TestSubmission from './pages/TestSubmission';
 
-import DepartmentData from './pages/DepartmentData';
+import TestResults from './pages/TestResults';
 
 import HeadOfDepartmentDashboard from './pages/HeadOfDepartmentDashboard';
 
@@ -63,7 +63,7 @@ return (
 <Route path="/manage-team" element={<ManageTeam />} />
 
 <Route path="/add-ingredients" element={<AddIngredients />} />
-<Route path="/department-data" element={<DepartmentData />} />
+<Route path="/Test-results" element={<TestResults />} />
  
 
 

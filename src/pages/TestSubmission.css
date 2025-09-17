@@ -261,3 +261,20 @@
     font-size: 0.9em;
   }
 }
+
+
+.test-details-table {
+  margin-bottom: 20px;
+}
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.details-table th, .details-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.details-table th {
+  background-color: #f2f2f2;
+}

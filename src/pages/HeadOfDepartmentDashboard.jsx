@@ -60,7 +60,7 @@ const HeadOfDepartmentDashboard = () => {
           setMicroIngredients(all.filter((ing) => ing.test_type === "Microbiology"));
         }
 
-        const res = await fetch("http://192.168.1.180:8000/api/hod/samples/", {
+        const res = await fetch("http://192.168.1.180:8000/api/dashboard/hod/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch samples.");
@@ -294,7 +294,7 @@ const HeadOfDepartmentDashboard = () => {
     <Layout
       menuItems={[
         { name: "Dashboard", path: "/hod-dashboard", icon: <FaTachometerAlt /> },
-        { name: "Department Data", path: "/department-data", icon: <FaFlask /> },
+        { name: "Test Results", path: "/Test-results", icon: <FaFlask /> },
         { name: "Manage Team", path: "/manage-team", icon: <FaUsers /> },
       ]}
     >
