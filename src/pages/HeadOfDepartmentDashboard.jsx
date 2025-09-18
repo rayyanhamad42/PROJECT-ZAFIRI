@@ -295,7 +295,7 @@ const HeadOfDepartmentDashboard = () => {
       menuItems={[
         { name: "Dashboard", path: "/hod-dashboard", icon: <FaTachometerAlt /> },
         { name: "Test Results", path: "/Test-results", icon: <FaFlask /> },
-        { name: "Manage Team", path: "/manage-team", icon: <FaUsers /> },
+        // { name: "Manage Team", path: "/manage-team", icon: <FaUsers /> },
       ]}
     >
       <div className="hod-dashboard-container">

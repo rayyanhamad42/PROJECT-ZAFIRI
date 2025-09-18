@@ -165,7 +165,7 @@ html {
   margin-bottom: 25px;
 }
 
-/* --- Forms (MODIFIED AGAIN) --- */
+/* --- Forms --- */
 .form-section {
   margin-bottom: 30px;
   border: 1px solid #e9ecef;
@@ -186,19 +186,17 @@ html {
 /* Main form grid for customer information */
 .form-grid {
   display: grid;
-  /* Define three columns for general form fields */
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px; /* Space between grid items */
-  align-items: flex-start; /* Aligns items to the start of their grid cell */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  align-items: flex-start;
 }
 
 /* Individual form group styling */
 .form-group {
-  /* No special display for form-group itself, let label/input manage it */
 }
 
 .form-group label {
-  display: block; /* Ensures label takes its own line */
+  display: block;
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-dark);
@@ -215,7 +213,7 @@ html {
   box-sizing: border-box;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
-  min-height: 48px; /* Ensure consistent height for all inputs/selects */
+  min-height: 48px;
 }
 
 .form-group input:focus,
@@ -231,46 +229,122 @@ html {
 .checkbox-group {
   display: flex;
   align-items: center;
-  gap: 8px; /* Space between checkbox and label */
+  gap: 8px;
 }
 
 .checkbox-group label {
-  margin-bottom: 0; /* Remove bottom margin for inline label */
-  font-weight: normal; /* Less bold for inline label */
-  display: inline-block; /* Allow label to sit next to checkbox */
+  margin-bottom: 0;
+  font-weight: normal;
+  display: inline-block;
 }
 
 .checkbox-group input[type="checkbox"] {
   width: auto;
   height: auto;
-  min-height: unset; /* Remove min-height for checkboxes */
+  min-height: unset;
 }
 
 /* Make fields span the entire grid row */
 .form-grid .full-width-field {
-  grid-column: 1 / -1; /* Spans across all columns */
+  grid-column: 1 / -1;
+}
+
+/* HAYA HAPA MAREKEBISHO YA MUHIMU */
+
+.phone-input-wrapper {
+  display: flex;
+  position: relative;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: visible; /* Hii ni mpya: Inahakikisha dropdown haifichwi */
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
+}
+
+.country-code-display {
+  padding: 12px;
+  background-color: var(--background-white);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1rem;
+  flex-shrink: 0;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.country-code-display .dropdown-arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--text-dark);
+  margin-left: 5px;
+}
+
+.phone-number-input-field {
+  flex-grow: 1;
+  padding: 12px;
+  border: none;
+  font-size: 1rem;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.phone-number-input-field:focus {
+  outline: none;
+}
+
+.country-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: var(--box-shadow-light);
+  z-index: 1001;
+}
+
+.country-picker-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.country-picker-option:hover {
+  background-color: var(--primary-light);
 }
 
 /* Specific adjustments for the row containing Country, Region, Street, Is Organization, National ID */
-/* We'll target these within the grid to ensure they align correctly */
-/* This will effectively create a new row with its own grid-like structure */
-.form-grid > .form-group:nth-child(6), /* Country */
-.form-grid > .form-group:nth-child(7), /* Region */
-.form-grid > .form-group:nth-child(8), /* Street */
-.form-grid > .form-group:nth-child(9), /* Is Organization */
-.form-grid > .form-group:nth-child(10), /* National ID (or Org fields) */
-.form-grid > .form-group:nth-child(11), /* Date Received */
-.form-grid > .form-group:nth-child(12) /* Date Submitted */
-{
-    /* No specific grid-column here, they will naturally flow in the main grid */
+.form-grid > .form-group:nth-child(6),
+.form-grid > .form-group:nth-child(7),
+.form-grid > .form-group:nth-child(8),
+.form-grid > .form-group:nth-child(9),
+.form-grid > .form-group:nth-child(10),
+.form-grid > .form-group:nth-child(11),
+.form-grid > .form-group:nth-child(12) {
 }
 
-/* If Organization name/id are present, they should also fit */
 .form-grid > .form-group:has(label:contains("Organization Name")),
 .form-grid > .form-group:has(label:contains("Organization ID")) {
-    /* These will also naturally flow within the grid */
 }
-
 
 .sample-box {
   border: 2px solid var(--primary-light);
@@ -574,66 +648,3 @@ html {
     grid-template-columns: 1fr;
   }
 }
-
-/* --- Phone Number Compacted Design --- */
-.phone-country-select {
-  display: grid;
-  grid-template-columns: min-content 1fr;
-  align-items: center;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: var(--background-white);
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.country-code-select {
-  padding: 12px;
-  border: none;
-  border-right: 1px solid var(--border-color);
-  background-color: var(--background-white);
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23333' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  height: 48px;
-}
-
-.phone-number-input {
-  padding: 12px;
-  border: none;
-  width: 100%;
-  box-sizing: border-box;
-  height: 48px;
-}
-
-.phone-country-select:focus-within {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 6px rgba(28, 163, 222, 0.3);
-}
-
-.phone-country-select select:focus,
-.phone-number-input:focus {
-  outline: none;
-}
-/* Media query for small screens */
-@media (max-width: 600px) {
-  .phone-country-select {
-    grid-template-columns: 1fr;
-    border-radius: 8px;
-  }
-
-  .country-code-select {
-    border-bottom: none;
-    border-right: none;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .phone-number-input {
-    border-radius: 0 0 8px 8px;
-  }
-}
-
-
-

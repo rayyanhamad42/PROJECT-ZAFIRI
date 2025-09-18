@@ -57,7 +57,7 @@ export default function LabTechnicianDashboard() {
   const menuItems = [
     { name: "Dashboard", path: "/technician-dashboard", icon: <FaTachometerAlt /> },
     { name: "View History", path: "/history", icon: <FaHistory /> },
-    { name: "Profile", path: "/profile", icon: <FaUser /> },
+    // { name: "Profile", path: "/profile", icon: <FaUser /> },
   ];
 
   return (

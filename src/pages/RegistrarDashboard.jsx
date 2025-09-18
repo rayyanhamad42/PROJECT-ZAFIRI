@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaTachometerAlt,
@@ -10,8 +10,77 @@ import {
 } from "react-icons/fa";
 import Select from "react-select";
 import Layout from "../components/Layout";
-import ClaimSubmission from "./ClaimSubmission"; // ClaimSubmissions component now uses parent state
+import ClaimSubmission from "./ClaimSubmission";
 import "./RegistrarDashboard.css";
+
+// Custom Country and Phone Input Component
+const CountryPhoneInput = ({
+  countryOptions,
+  selectedCountry,
+  setSelectedCountry,
+  phoneNumber,
+  setPhoneNumber,
+}) => {
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // If the click is outside the component, close the dropdown
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setShowCountryPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleCountrySelection = (country) => {
+    setSelectedCountry(country);
+    setShowCountryPicker(false);
+  };
+  
+  const handleTogglePicker = (event) => {
+      // Stop propagation to prevent the document's click listener from firing immediately
+      event.stopPropagation();
+      setShowCountryPicker(prev => !prev);
+  };
+
+  return (
+    <div className="phone-input-wrapper" ref={wrapperRef}>
+      <div 
+        className="country-code-display" 
+        onClick={handleTogglePicker}
+      >
+        <span>{selectedCountry.flag} {selectedCountry.name} {selectedCountry.code}</span>
+        <span className="dropdown-arrow"></span>
+      </div>
+      {showCountryPicker && (
+        <div className="country-picker">
+          {countryOptions.map((country) => (
+            <div
+              key={country.code}
+              className="country-picker-option"
+              onClick={() => handleCountrySelection(country)}
+            >
+              {country.flag} {country.name} {country.code}
+            </div>
+          ))}
+        </div>
+      )}
+      <input
+        type="tel"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        required
+        placeholder="Enter phone number"
+        className="phone-number-input-field"
+      />
+    </div>
+  );
+};
 
 export default function RegistrarDashboard() {
   const navigate = useNavigate();
@@ -19,7 +88,7 @@ export default function RegistrarDashboard() {
 
   const [registrarName] = useState(localStorage.getItem("username") || "Registrar");
 
-  // Customer fields (unchanged)
+  // Customer fields
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -32,9 +101,8 @@ export default function RegistrarDashboard() {
   const [nationalId, setNationalId] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [organizationId, setOrganizationId] = useState("");
-  // add new state fields at top with other useState
-const [dateReceived, setDateReceived] = useState("");
-const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
+  const [dateReceived, setDateReceived] = useState("");
+  const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
 
   const [modalSample, setModalSample] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -46,8 +114,11 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
   const countryOptions = [
     { name: "TZ", code: "+255", flag: "🇹🇿" },
     { name: "KE", code: "+254", flag: "🇰🇪" },
+    { name: "UG", code: "+256", flag: "🇺🇬" },
+    { name: "RW", code: "+250", flag: "🇷🇼" },
+    { name: "BI", code: "+257", flag: "🇧🇮" },
   ];
-  const [selectedCountry, setSelectedCountry] = useState(countryOptions[0]); // Default to Tanzania
+  const [selectedCountry, setSelectedCountry] = useState(countryOptions[0]);
 
   const [ingredients, setIngredients] = useState([]);
   const [microIngredients, setMicroIngredients] = useState([]);
@@ -63,7 +134,6 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
 
   const MARKING_FEE = 10000.0;
 
-  // --- MOCK fallback data for UI (used only if backend returns none) ---
   const MOCK_UNCLAIMED = [
     {
       id: 1,
@@ -83,7 +153,7 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
         organization_id: "",
       },
       sample_details: "Water Quality Test",
-      payment: { amount_due: 50000, status: "pending" }, // lowercase for safety
+      payment: { amount_due: 50000, status: "pending" },
     },
     {
       id: 2,
@@ -107,18 +177,15 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
     },
   ];
 
-  // IMPORTANT: keep parent state for unclaimedSamples here and pass into ClaimSubmission
   const [unclaimedSamples, setUnclaimedSamples] = useState(MOCK_UNCLAIMED);
 
   const menuItems = [
     { name: "Dashboard", path: "/registrar-dashboard", icon: <FaTachometerAlt /> },
     { name: "Register Sample", path: "/registrar-dashboard/register-sample", icon: <FaUserPlus /> },
     { name: "Claim Submissions", path: "/registrar-dashboard/claim-submissions", icon: <FaClipboardCheck /> },
-    { name: "Verify Payment", path: "/registrar-dashboard/verify-payment", icon: <FaFlask /> },
     { name: "Sample History", path: "/registrar-dashboard/sample-history", icon: <FaHistory /> },
   ];
 
-  // set active tab based on route path (keeps existing behavior)
   useEffect(() => {
     const { pathname } = location;
     if (pathname.includes("verify-payment")) setActiveTab("verify-payment");
@@ -128,12 +195,10 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
     else setActiveTab("dashboard");
   }, [location.pathname]);
 
-  // fetch ingredients and unclaimed samples (kept as before)
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
       try {
-        // Load Ingredients
         const ingRes = await fetch("http://192.168.1.180:8000/api/ingredients/", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -145,15 +210,12 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
           setChemIngredients(all.filter((ing) => ing.test_type === "Chemistry"));
         }
 
-        // Load Unclaimed Submissions
         const claimRes = await fetch("http://192.168.1.180:8000/api/unclaimed-samples/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (claimRes.ok) {
           const claimData = await claimRes.json();
-          // only replace mock data if API returns something non-empty
           if (Array.isArray(claimData) && claimData.length > 0) {
-            // normalize status to lowercase to avoid capitalization mismatches
             const normalized = claimData.map((c) => ({
               ...c,
               payment: {
@@ -162,17 +224,15 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
               },
             }));
             setUnclaimedSamples(normalized);
-          } // else keep the mock data so UI remains visible for design testing
+          }
         }
       } catch (err) {
         setError("Failed to load data.");
-        // keep MOCK_UNCLAIMED so UI still shows
       }
     };
     fetchData();
   }, [token]);
 
-  // rest of your functions unchanged (handleSampleChange, handleSelectChange, addNewSample, calculateTotalPrice, handleSubmit, etc.)
   const handleSampleChange = (index, field, value) => {
     const updated = [...samplesToAdd];
     updated[index][field] = value;
@@ -181,13 +241,8 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
 
   const handleSelectChange = (index, selectedOptions, category) => {
     const updated = [...samplesToAdd];
-    const field =
-      category === "microbiology"
-        ? "selected_micro_ingredients"
-        : "selected_chem_ingredients";
-    updated[index][field] = selectedOptions
-      ? selectedOptions.map((o) => o.value)
-      : [];
+    const field = category === "microbiology" ? "selected_micro_ingredients" : "selected_chem_ingredients";
+    updated[index][field] = selectedOptions ? selectedOptions.map((o) => o.value) : [];
     setSamplesToAdd(updated);
   };
 
@@ -206,10 +261,7 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
   const calculateTotalPrice = () => {
     let testsPrice = 0;
     samplesToAdd.forEach((sample) => {
-      const allSelected = [
-        ...sample.selected_micro_ingredients,
-        ...sample.selected_chem_ingredients,
-      ];
+      const allSelected = [...sample.selected_micro_ingredients, ...sample.selected_chem_ingredients];
       allSelected.forEach((id) => {
         const ing = ingredients.find((x) => x.id === id);
         if (ing) testsPrice += parseFloat(ing.price || 0);
@@ -245,21 +297,18 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
         national_id: nationalId,
         organization_name: organizationName,
         organization_id: organizationId,
-        date_received: dateReceived,          // ✅ new
-    date_submitted_to_hod: dateSubmittedToHOD, // ✅ new
+        date_received: dateReceived,
+        date_submitted_to_hod: dateSubmittedToHOD,
       },
       samples: samplesToAdd.map((s) => ({
-    sample_name: s.sample_name,
-    sample_details: s.sample_details,
-    selected_ingredients: [
-      ...s.selected_micro_ingredients,
-      ...s.selected_chem_ingredients,
-    ],
-  })),
-};
+        sample_name: s.sample_name,
+        sample_details: s.sample_details,
+        selected_ingredients: [...s.selected_micro_ingredients, ...s.selected_chem_ingredients],
+      })),
+    };
     try {
       const response = await fetch(
-        "http://192.168.1.180:8000/api/registrar/register-sample/", // ✅ correct endpoint
+        "http://192.168.1.180:8000/api/registrar/register-sample/",
         {
           method: "POST",
           headers: {
@@ -280,7 +329,6 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
 
       alert(data.message || "Samples submitted successfully! Registrar has registered the customer & sample.");
 
-      // Clear form
       setFirstName("");
       setMiddleName("");
       setLastName("");
@@ -318,21 +366,19 @@ const [dateSubmittedToHOD, setDateSubmittedToHOD] = useState("");
     label: `${ingredient.name} (TZS ${ingredient.price})`,
   }));
 
-  // Define regions by country
-const regionOptions = {
-  Tanzania: ["Zanzibar", "Dar es Salaam", "Arusha", "Dodoma", "Mwanza", "Pemba"],
-  Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"],
-  Uganda: ["Kampala", "Entebbe", "Gulu", "Mbarara"],
-  Rwanda: ["Kigali", "Butare", "Gisenyi", "Ruhengeri"],
-  Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
-};
+  const regionOptions = {
+    Tanzania: ["Zanzibar", "Dar es Salaam", "Arusha", "Dodoma", "Mwanza", "Pemba"],
+    Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"],
+    Uganda: ["Kampala", "Entebbe", "Gulu", "Mbarara"],
+    Rwanda: ["Kigali", "Butare", "Gisenyi", "Ruhengeri"],
+    Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
+  };
 
   return (
     <Layout menuItems={menuItems}>
       <div className="dashboard-content">
         {error && <div className="error-message">{error}</div>}
 
-        {/* Register Sample */}
         {(activeTab === "register-sample" || activeTab === "dashboard") && (
           <section className="content-card register-sample-page">
             <h2 className="section-title"><FaUserPlus /> Register Customer & Sample</h2>
@@ -340,77 +386,57 @@ const regionOptions = {
               <div className="form-section">
                 <h3>Customer Information</h3>
                 <div className="form-grid">
-  
                   <div className="form-group"><label>First Name</label><input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></div>
                   <div className="form-group"><label>Middle Name</label><input value={middleName} onChange={(e) => setMiddleName(e.target.value)} /></div>
                   <div className="form-group"><label>Last Name</label><input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></div>
                   <div className="form-group full-width-field">
-    <label>Phone Number</label>
-    <div className="phone-country-select">
-      <select
-        value={selectedCountry.name}
-        onChange={(e) => setSelectedCountry(countryOptions.find(c => c.name === e.target.value))}
-        className="country-code-select"
-      >
-        {countryOptions.map((country) => (
-          <option key={country.code} value={country.name}>
-            {country.flag} {country.name} ({country.code})
-          </option>
-        ))}
-      </select>
-      <input
-        className="phone-number-input"
-        value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-        required
-        placeholder="Enter phone number"
-      />
-    </div>
-  </div>
-
-
-  <div className="form-group full-width-field">
-    <label>Email</label>
-    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-  </div>
-
-                <div className="form-group">
-  <label>Country</label>
-  <select
-    value={country}
-    onChange={(e) => {
-      setCountry(e.target.value);
-      setRegion(""); // reset region when country changes
-    }}
-    required
-  >
-    <option value="">-- Select Country --</option>
-    {Object.keys(regionOptions).map((c) => (
-      <option key={c} value={c}>
-        {c}
-      </option>
-    ))}
-  </select>
-</div>
-                 
-<div className="form-group">
-  <label>Region</label>
-  <select
-    value={region}
-    onChange={(e) => setRegion(e.target.value)}
-    required
-    disabled={!country} // disable until country is chosen
-  >
-    <option value="">-- Select Region --</option>
-    {country &&
-      regionOptions[country].map((r) => (
-        <option key={r} value={r}>
-          {r}
-        </option>
-      ))}
-  </select>
-</div>
-
+                    <label>Phone Number *</label>
+                    <CountryPhoneInput
+                      countryOptions={countryOptions}
+                      selectedCountry={selectedCountry}
+                      setSelectedCountry={setSelectedCountry}
+                      phoneNumber={phoneNumber}
+                      setPhoneNumber={setPhoneNumber}
+                    />
+                  </div>
+                  <div className="form-group full-width-field">
+                    <label>Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Country</label>
+                    <select
+                      value={country}
+                      onChange={(e) => {
+                        setCountry(e.target.value);
+                        setRegion("");
+                      }}
+                      required
+                    >
+                      <option value="">-- Select Country --</option>
+                      {Object.keys(regionOptions).map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Region</label>
+                    <select
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      required
+                      disabled={!country}
+                    >
+                      <option value="">-- Select Region --</option>
+                      {country && regionOptions[country].map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="form-group"><label>Street</label><input value={street} onChange={(e) => setStreet(e.target.value)} required /></div>
                   <div className="form-group checkbox-group"><label>Is Organization?</label><input type="checkbox" checked={isOrganization} onChange={(e) => setIsOrganization(e.target.checked)} /></div>
                   {!isOrganization ? (
@@ -420,30 +446,26 @@ const regionOptions = {
                       <div className="form-group"><label>Organization Name</label><input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required /></div>
                       <div className="form-group"><label>Organization ID</label><input value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} required /></div>
                     </>
-
                   )}
                   <div className="form-group">
-  <label>Date Received from Customer</label>
-  <input
-    type="date"
-    value={dateReceived}
-    onChange={(e) => setDateReceived(e.target.value)}
-    required
-  />
-</div>
-
-<div className="form-group">
-  <label>Date Submitted to HOD</label>
-  <input
-    type="date"
-    value={dateSubmittedToHOD}
-    onChange={(e) => setDateSubmittedToHOD(e.target.value)}
-    required
-  />
-</div>
-
+                    <label>Date Received from Customer</label>
+                    <input
+                      type="date"
+                      value={dateReceived}
+                      onChange={(e) => setDateReceived(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Date Submitted to HOD</label>
+                    <input
+                      type="date"
+                      value={dateSubmittedToHOD}
+                      onChange={(e) => setDateSubmittedToHOD(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
-
               </div>
 
               <div className="form-section">
@@ -470,10 +492,8 @@ const regionOptions = {
           </section>
         )}
 
-        {/* Claim Submissions - stats + table only visible when activeTab is claim-submissions */}
         {activeTab === "claim-submissions" && (
           <>
-            {/* Stats Cards */}
             <div className="stats-cards">
               <div className="stat-card approved">
                 <h3>Approved</h3>
@@ -488,13 +508,10 @@ const regionOptions = {
                 <p>{unclaimedSamples.length}</p>
               </div>
             </div>
-
-            {/* Pass parent state into ClaimSubmission so updates reflect in the cards */}
             <ClaimSubmission unclaimedSamples={unclaimedSamples} setUnclaimedSamples={setUnclaimedSamples} />
           </>
         )}
 
-        {/* Verify Payment */}
         {activeTab === "verify-payment" && (
           <section className="content-card">
             <h2 className="section-title"><FaFlask /> Verify Payment</h2>
@@ -502,7 +519,6 @@ const regionOptions = {
           </section>
         )}
 
-        {/* History */}
         {activeTab === "sample-history" && (
           <section className="content-card">
             <h2 className="section-title"><FaHistory /> Sample History</h2>

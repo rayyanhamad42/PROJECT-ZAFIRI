@@ -36,25 +36,25 @@ const TestResults = () => {
         }
 
         const samples = await response.json();
-        console.log("Test Results response at 10:15 AM EAT 09/17/2025:", samples);
+        console.log("Test Results response at 11:15 AM EAT 09/17/2025:", samples);
 
         // Flatten samples.tests into a list of tests with sample info
         const flattenedTests = samples.flatMap(sample =>
           sample.tests.map(test => ({
             id: test.id,
+            laboratory_number: test.sample.laboratory_number || sample.laboratory_number || "—",
             total_amount: sample.payment?.amount_due || "—",
-            sample_name: sample.sample_name,
-            sample_details: sample.sample_details,
-            date_received: sample.date_received,
-            registrar_name: sample.registrar_name,
+            sample_name: test.sample.sample_name || sample.sample_name || "—",
+            sample_details: test.sample.sample_details || sample.sample_details || "—",
+            date_received: test.sample.date_received || sample.date_received || "—",
+            registrar_name: test.sample.registrar_name || sample.claimed_by?.username || "—",
             customer: sample.customer,
             ingredient_name: test.ingredient?.name || "N/A",
             results: test.results || "N/A",
             status: test.status,
-            submitted_date: test.submitted_date,
-            payment: sample.payment,
+            submitted_date: test.submitted_date || "—",
           }))
-        ).filter(test => test.status === "Awaiting HOD Review"); // Only show tests awaiting review
+        ).filter(test => test.status === "Awaiting HOD Review");
 
         setTests(flattenedTests);
 
@@ -65,7 +65,9 @@ const TestResults = () => {
 
         if (techResponse.ok) {
           const techData = await techResponse.json();
-          setTechnicians(techData); // Assuming response is array of technicians
+          setTechnicians(techData);
+        } else {
+          throw new Error("Failed to fetch technicians.");
         }
       } catch (err) {
         console.error("Error fetching test results:", err);
@@ -86,6 +88,7 @@ const TestResults = () => {
   const handleApproveResult = async (testId) => {
     try {
       setModalError("");
+      setModalSuccess("");
       const response = await fetch(`http://192.168.1.180:8000/api/hod/accept-result/${testId}/`, {
         method: 'POST',
         headers: {
@@ -95,18 +98,18 @@ const TestResults = () => {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to approve result: ${response.status}`);
+        throw new Error(errorData.error || `Failed to approve and submit to Director General: ${response.status}`);
       }
       const data = await response.json();
       if (data.success) {
         setTests(prev => prev.filter(t => t.id !== testId));
-        setModalSuccess("Result approved successfully!");
+        setModalSuccess("Result approved and submitted to Director General successfully!");
         setTimeout(() => setModalSuccess(""), 2000);
         setShowDetailsModal(false);
       }
     } catch (err) {
       console.error("Error approving result:", err);
-      setModalError(err.message || 'Failed to approve result.');
+      setModalError(err.message || 'Failed to approve and submit to Director General.');
     }
   };
 
@@ -114,13 +117,17 @@ const TestResults = () => {
     try {
       setModalError("");
       setModalSuccess("");
+      if (!selectedTechnicianId) {
+        setModalError("Please select a technician to reassign.");
+        return;
+      }
       const response = await fetch(`http://192.168.1.180:8000/api/hod/reject-result/${testId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ reassigned_to: selectedTechnicianId }), // Pass new technician ID for reassign
+        body: JSON.stringify({ reassigned_to: selectedTechnicianId }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -128,7 +135,7 @@ const TestResults = () => {
       }
       const data = await response.json();
       if (data.success) {
-        setTests(prev => prev.filter(t => t.id !== testId)); // Remove from list
+        setTests(prev => prev.filter(t => t.id !== testId));
         setModalSuccess("Result rejected and reassigned successfully!");
         setTimeout(() => setModalSuccess(""), 2000);
         setShowRejectModal(false);
@@ -148,7 +155,7 @@ const TestResults = () => {
 
   const openRejectModal = (test) => {
     setSelectedTest(test);
-    setSelectedTechnicianId(""); // Reset selection
+    setSelectedTechnicianId("");
     setShowRejectModal(true);
   };
 
@@ -178,7 +185,7 @@ const TestResults = () => {
               <table className="overview-table">
                 <thead>
                   <tr>
-                    <th>Total Amount</th>
+                    <th>Lab Number</th>
                     <th>Date of Submission</th>
                     <th>Laboratory Results</th>
                     <th>Analysis Request</th>
@@ -191,10 +198,10 @@ const TestResults = () => {
                     <tr><td colSpan="6">Loading...</td></tr>
                   ) : tests.length ? (
                     tests.map(test => {
-                      const isApproved = test.status === "Approved";
+                      const isApproved = test.status === "Approved" || test.status === "Awaiting DG Review";
                       return (
                         <tr key={test.id}>
-                          <td>{test.total_amount || "—"}</td>
+                          <td>{test.laboratory_number || "—"}</td>
                           <td>{test.submitted_date ? new Date(test.submitted_date).toLocaleDateString() : "—"}</td>
                           <td>{test.results || "N/A"}</td>
                           <td>{test.ingredient_name || "—"}</td>
@@ -206,7 +213,7 @@ const TestResults = () => {
                             >
                               <FaEye /> View Details
                             </button>
-                          
+                            
                           </td>
                         </tr>
                       );
@@ -229,16 +236,12 @@ const TestResults = () => {
                     <h4>Customer Information</h4>
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>First Name</label>
-                        <p>{selectedTest.customer?.first_name || "—"}</p>
-                      </div>
-                      <div className="form-group">
-                        <label>Middle Name</label>
-                        <p>{selectedTest.customer?.middle_name || "—"}</p>
-                      </div>
-                      <div className="form-group">
-                        <label>Last Name</label>
-                        <p>{selectedTest.customer?.last_name || "—"}</p>
+                        <label>Name</label>
+                        <p>
+                          {selectedTest.customer?.is_organization
+                            ? selectedTest.customer.organization_name || "—"
+                            : `${selectedTest.customer?.first_name || ""} ${selectedTest.customer?.middle_name || ""} ${selectedTest.customer?.last_name || ""}`.trim() || "—"}
+                        </p>
                       </div>
                       <div className="form-group">
                         <label>Phone</label>
@@ -270,16 +273,10 @@ const TestResults = () => {
                           <p>{selectedTest.customer?.national_id || "—"}</p>
                         </div>
                       ) : (
-                        <>
-                          <div className="form-group">
-                            <label>Organization Name</label>
-                            <p>{selectedTest.customer?.organization_name || "—"}</p>
-                          </div>
-                          <div className="form-group">
-                            <label>Organization ID</label>
-                            <p>{selectedTest.customer?.organization_id || "—"}</p>
-                          </div>
-                        </>
+                        <div className="form-group">
+                          <label>Organization ID</label>
+                          <p>{selectedTest.customer?.organization_id || "—"}</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -295,8 +292,8 @@ const TestResults = () => {
                       <p>{selectedTest.sample_details || "—"}</p>
                     </div>
                     <div className="form-group">
-                      <label>Total Amount</label>
-                      <p>{selectedTest.total_amount || "—"}</p>
+                      <label>Total Payment</label>
+                      <p>{selectedTest.total_amount ? new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(selectedTest.total_amount) : "—"}</p>
                     </div>
                     <div className="form-group">
                       <label>Date Received</label>
@@ -332,18 +329,18 @@ const TestResults = () => {
                     <button
                       className="action-btn approve-btn"
                       onClick={() => handleApproveResult(selectedTest.id)}
-                      disabled={selectedTest.status === "Approved"}
+                      disabled={selectedTest.status === "Approved" || selectedTest.status === "Awaiting DG Review"}
                     >
                       <FaCheckCircle /> Approve
                     </button>
                     <button
                       className="action-btn reject-btn"
                       onClick={() => openRejectModal(selectedTest)}
-                      disabled={selectedTest.status === "Approved"}
+                      disabled={selectedTest.status === "Approved" || selectedTest.status === "Awaiting DG Review"}
                     >
                       <FaTimes /> Reject & Reassign
                     </button>
-                    <button type="button" onClick={() => setShowDetailsModal(false)}>
+                    <button type="button" className="action-btn" onClick={() => setShowDetailsModal(false)}>
                       Close
                     </button>
                     {modalSuccess && <p className="success-text">{modalSuccess}</p>}
@@ -386,9 +383,9 @@ const TestResults = () => {
                       onClick={() => handleRejectResult(selectedTest.id)}
                       disabled={!selectedTechnicianId}
                     >
-                      <FaTimes /> Reassign & Reject
+                      <FaTimes /> Reject & Reassign
                     </button>
-                    <button type="button" onClick={() => setShowRejectModal(false)}>
+                    <button type="button" className="action-btn" onClick={() => setShowRejectModal(false)}>
                       Cancel
                     </button>
                     {modalSuccess && <p className="success-text">{modalSuccess}</p>}
