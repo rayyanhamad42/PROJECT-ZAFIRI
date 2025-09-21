@@ -648,3 +648,26 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+/* ===== Sample History Labels ===== */
+.submitted-label {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #007bff; /* blue */
+  color: white;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.claimed-label {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #28a745; /* green */
+  color: white;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

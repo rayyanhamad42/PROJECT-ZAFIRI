@@ -232,7 +232,30 @@ export default function RegistrarDashboard() {
     };
     fetchData();
   }, [token]);
+ 
 
+
+      const handleClaim = (sampleId) => {
+    setUnclaimedSamples((prev) =>
+      prev.map((s) =>
+        s.id === sampleId
+          ? { ...s, source: "claimed", payment: { ...s.payment, status: "approved" } }
+          : s
+      )
+    );
+  };
+
+  const handleSubmitToHOD = (sampleId) => {
+    setUnclaimedSamples((prev) =>
+      prev.map((s) =>
+        s.id === sampleId
+          ? { ...s, source: "submitted" }
+          : s
+      )
+    );
+  };
+
+     
   const handleSampleChange = (index, field, value) => {
     const updated = [...samplesToAdd];
     updated[index][field] = value;
@@ -379,7 +402,7 @@ export default function RegistrarDashboard() {
       <div className="dashboard-content">
         {error && <div className="error-message">{error}</div>}
 
-        {(activeTab === "register-sample" || activeTab === "dashboard") && (
+        {activeTab === "register-sample" && (
           <section className="content-card register-sample-page">
             <h2 className="section-title"><FaUserPlus /> Register Customer & Sample</h2>
             <form onSubmit={handleSubmit}>
@@ -508,7 +531,8 @@ export default function RegistrarDashboard() {
                 <p>{unclaimedSamples.length}</p>
               </div>
             </div>
-            <ClaimSubmission unclaimedSamples={unclaimedSamples} setUnclaimedSamples={setUnclaimedSamples} />
+<ClaimSubmission unclaimedSamples={unclaimedSamples} onClaim={handleClaim} />
+
           </>
         )}
 
@@ -518,13 +542,89 @@ export default function RegistrarDashboard() {
             <p>Registrar can check payment manually here if finance provides control/reference number.</p>
           </section>
         )}
+{activeTab === "sample-history" && (
+  <section className="content-card">
+    <h2 className="section-title"><FaHistory /> Sample History</h2>
 
-        {activeTab === "sample-history" && (
-          <section className="content-card">
-            <h2 className="section-title"><FaHistory /> Sample History</h2>
-            <p>Coming soon…</p>
-          </section>
-        )}
+    {unclaimedSamples.filter((s) => s.source === "claimed" || s.source === "submitted").length === 0 ? (
+      <p>No sample history yet.</p>
+    ) : (
+      <table className="history-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Middle Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Country</th>
+            <th>Region</th>
+            <th>Street</th>
+            <th>Is Organization</th>
+            <th>National ID</th>
+            <th>Organization Name</th>
+            <th>Organization ID</th>
+            <th>Sample Name</th>
+            <th>Sample Details</th>
+            <th>Delivery Date</th>
+            <th>Submission Date</th>
+            <th>Submission Time</th>
+            <th>Payment Due</th>
+            <th>Status</th>
+            <th>History Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {unclaimedSamples
+            .filter((s) => s.source === "claimed" || s.source === "submitted")
+            .map((s) => {
+              const c = s.customer || s.customer_details || {};
+              const statusLower = (s.payment?.status || "pending").toLowerCase();
+
+              return (
+                <tr key={s.id}>
+                  <td>{s.id}</td>
+                  <td>{c.first_name}</td>
+                  <td>{c.middle_name}</td>
+                  <td>{c.last_name}</td>
+                  <td>{`${c.phone_country_code || ""} ${c.phone_number || ""}`}</td>
+                  <td>{c.email}</td>
+                  <td>{c.country}</td>
+                  <td>{c.region}</td>
+                  <td>{c.street}</td>
+                  <td>{c.is_organization ? "Yes" : "No"}</td>
+                  <td>{c.national_id}</td>
+                  <td>{c.organization_name || "N/A"}</td>
+                  <td>{c.organization_id || "N/A"}</td>
+                  <td>{s.sample_name || "N/A"}</td>
+                  <td>{s.sample_details || "N/A"}</td>
+                  <td>{s.delivery_date || "N/A"}</td>
+                  <td>{c.submission_date || "N/A"}</td>
+                  <td>{c.submission_time || "N/A"}</td>
+                  <td>{s.payment?.amount_due ?? "N/A"} TZS</td>
+                  <td>
+                    <span className={`status-badge ${statusLower}`}>
+                      {s.payment?.status || "Pending"}
+                    </span>
+                  </td>
+                  <td>
+                    {s.source === "submitted" ? (
+                      <span className="submitted-label">Submitted to HOD</span>
+                    ) : (
+                      <span className="claimed-label">Claimed by Registrar</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
+    )}
+  </section>
+)}
+
+
       </div>
     </Layout>
   );
