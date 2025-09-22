@@ -128,8 +128,8 @@ const fetchUnclaimedSamples = async () => {
             <td>{sample.sample_name || "N/A"}</td>
             <td>{sample.sample_details || "N/A"}</td>
             <td>{sample.delivery_date || "N/A"}</td>
-            <td>{c.submission_date || "N/A"}</td>
-            <td>{c.submission_time || "N/A"}</td>
+            <td>{sample.submission_date || "N/A"}</td>
+            <td>{sample.submission_time || "N/A"}</td>
             <td>{sample.payment?.amount_due ?? "N/A"} TZS</td>
 
             <td>
